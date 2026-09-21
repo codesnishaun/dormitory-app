@@ -19,7 +19,7 @@
         
             <div class="flex flex-wrap gap-3.5 mt-8">
                 <x-button>Apply for a room</x-button>
-                <x-button variant="ghost">Log in to your account</x-button>
+                <x-button variant="subtle">Log in to your account</x-button>
             </div>
         
             <div class="flex flex-wrap gap-7 mt-11">
@@ -59,6 +59,7 @@
             icon="⏻"
             title="Rooms & sub-meters"
             description="Every room's electric sub-meter, logged and billed independently, no shared guesswork."
+            iconColor="text-ink"
         />
 
         <x-card
@@ -67,18 +68,19 @@
             description="House notices that reach every tenant's dashboard the moment they're posted."
         />
 
-   
-        <div class="bg-paper3 border border-ink/[0.08] rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg transition">
-            <div class="w-9 h-9 rounded-[10px] flex items-center justify-center mb-4 text-lg bg-danger/[0.13] text-danger">🛠</div>
-            <h4 class="text-base font-semibold text-ink mb-2">Maintenance</h4>
-            <p class="text-[13.5px] text-inkSoft leading-relaxed">Tenants log a repair once; admin tracks it from pending to resolved.</p>
-        </div>
+        <x-card
+            icon="🛠"
+            title="Maintenance"
+            description="Tenants log a repair once; admin tracks it from pending to resolved."
+            iconColor="text-danger"
+        />
 
-        <div class="bg-paper3 border border-ink/[0.08] rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg transition">
-            <div class="w-9 h-9 rounded-[10px] flex items-center justify-center mb-4 text-lg bg-ink/[0.08] text-ink">✳</div>
-            <h4 class="text-base font-semibold text-ink mb-2">DORA Assistant</h4>
-            <p class="text-[13.5px] text-inkSoft leading-relaxed">An AI response assistant answering house questions, drafting notices, and triaging requests.</p>
-        </div>
+        <x-card
+            icon="✳"
+            title="DORA Assistant"
+            description="An AI response assistant answering house questions, drafting notices, and triaging requests."
+            iconColor="text-ink"
+        />
     </div>
     </section>
 

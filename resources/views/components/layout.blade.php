@@ -20,8 +20,8 @@
             </div>
         </div>
         <div class="flex gap-2.5">
-            <button class="px-5 py-2 rounded-full text-sm font-semibold border border-paper/35 text-paper hover:border-paper transition">Apply for a room</button>
-            <button class="px-5 py-2 rounded-full text-sm font-semibold text-paper/80 hover:text-paper transition">Log in</button>
+            <x-button variant="subtle">Apply for a room</x-button>
+            <x-button variant="subtle">Log in</x-button>
         </div>
     </nav>
 
