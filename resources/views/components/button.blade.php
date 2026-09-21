@@ -9,7 +9,7 @@
     $variants = [
         'copper' => 'bg-copper text-white border border-transparent hover:bg-copperDeep',
         'teal' => 'bg-teal text-white border border-transparent hover:bg-tealDeep',
-        'ghost' => 'bg-transparent text-paper border border-paper/35 hover:border-paper',
+        'subtle' => 'bg-transparent text-paper border border-paper/35 hover:border-paper',
         'outline' => 'bg-transparent text-ink border border-ink/[0.14] hover:border-ink',
         'danger' => 'bg-transparent text-danger border border-danger/40 hover:bg-danger/[0.08]',
     ];
