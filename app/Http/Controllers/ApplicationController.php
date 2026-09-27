@@ -11,7 +11,7 @@ class ApplicationController extends Controller
      */
     public function index()
     {
-        return view('application_form');
+        return view('application-form');
     }
 
     /**
