@@ -1,6 +1,6 @@
-<x-layout>
+<x-layout bodyClass="min-h-screen flex flex-col bg-ink font-sans">
     <x-slot:title>
-        Home Page
+        Home Page - DORA
     </x-slot:title>
     
     <section class="relative overflow-hidden px-[6vw] pt-[9vw] pb-[6vw] grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5 items-center">
@@ -19,7 +19,7 @@
         
             <div class="flex flex-wrap gap-3.5 mt-8">
                 <x-button>Apply for a room</x-button>
-                <x-button variant="subtle">Log in to your account</x-button>
+                <x-button variant="secondary">Log in to your account</x-button>
             </div>
         
             <div class="flex flex-wrap gap-7 mt-11">
