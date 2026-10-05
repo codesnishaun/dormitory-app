@@ -56,9 +56,7 @@
                         id="location"
                         class="relative min-h-[17rem] overflow-hidden rounded-[1.25rem] bg-paper2 sm:min-h-[22rem]"
                         aria-label="Illustrated neighborhood map showing Cozy Haven in San Ildefonso, Bulacan"
-                    >
-                        <div class="absolute inset-0 opacity-70 [background-image:linear-gradient(90deg,rgba(47,111,110,0.08)_1px,transparent_1px),linear-gradient(rgba(47,111,110,0.08)_1px,transparent_1px)] [background-size:34px_34px]"></div>
-                        
+                    > 
 
                         <div class="absolute left-[48%] top-[39%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
                             <span class="flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-copper text-white shadow-lg sm:h-14 sm:w-14">
