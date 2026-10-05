@@ -4,30 +4,7 @@
 
     {{-- Sidebar links. Palitan ang '#' ng route() kapag may routes na. --}}
     <x-slot:navigation>
-        <div class="mb-2 rounded-xl bg-paper/10 px-4 py-3 md:mb-4">
-            <div class="text-sm font-semibold text-paper">Marianne Santos</div>
-            <div class="text-[11px] uppercase tracking-widest text-paper/55">Room R101</div>
-        </div>
-
-        <a href="#" aria-current="page"
-           class="flex items-center gap-3 whitespace-nowrap rounded-xl bg-copper px-4 py-2.5 text-sm font-medium text-paper">
-            <span aria-hidden="true">◧</span> Home
-        </a>
-        <a href="#" class="flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium text-paper/70 hover:bg-paper/10 hover:text-paper">
-            <span aria-hidden="true">⏻</span> My room &amp; bill
-        </a>
-        <a href="#" class="flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium text-paper/70 hover:bg-paper/10 hover:text-paper">
-            <span aria-hidden="true">📣</span> Announcements
-        </a>
-        <a href="#" class="flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium text-paper/70 hover:bg-paper/10 hover:text-paper">
-            <span aria-hidden="true">🛠</span> Maintenance
-        </a>
-        <a href="#" class="flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium text-paper/70 hover:bg-paper/10 hover:text-paper">
-            <span aria-hidden="true">✳</span> Ask DORA
-        </a>
-        <a href="#" class="flex items-center gap-3 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium text-paper/70 hover:bg-paper/10 hover:text-paper md:mt-6 md:border-t md:border-paper/10 md:pt-5">
-            <span aria-hidden="true">↩</span> Log out
-        </a>
+        <x-tenant-sidebar active="home" />
     </x-slot:navigation>
 
     {{-- Page content --}}
