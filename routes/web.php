@@ -11,7 +11,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/application_form', [ApplicationController::class, 'index'])->name('application_form');
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 
-Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
-Route::get('/tenant/dashboard', [TenantDashboardController::class, 'index'])->name('tenant.dashboard');
+Route::get('/tenant', [TenantDashboardController::class, 'index'])->name('tenant.dashboard');
 
