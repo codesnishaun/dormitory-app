@@ -1,12 +1,12 @@
 {{-- Cream ang content area; ang sidebar ay nananatiling bg-ink galing sa app.blade.php --}}
 <x-tenant-layout body-class="min-h-screen font-sans text-ink">
-    <x-slot:title>Home - DORA</x-slot:title>
+    <x-slot:title>Dashboard - DORA</x-slot:title>
 
     {{-- Page content --}}
-    <header class="mb-7">
-        <h1 class="font-display text-3xl font-bold">Home</h1>
-        <p class="mt-1 text-sm text-inkSoft">Welcome back — here is what is new at Cozy Haven.</p>
-    </header>
+    <x-header
+        title="Dashboard"
+        description="Welcome back — here is what is new at Cozy Haven."
+    />
 
     {{-- Placeholder data. Papalitan ng backend ng totoong values. --}}
     <section class="mb-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
