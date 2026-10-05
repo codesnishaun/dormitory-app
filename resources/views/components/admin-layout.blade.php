@@ -45,11 +45,11 @@
                     :active="request()->routeIs('admin.announcement.index')"
                 >Announcement</x-button>
 
-                {{-- <x-button
+                <x-button
                     variant="sidebar"
                     :href="route('admin.maintenance.index')"
                     :active="request()->routeIs('admin.maintenance.index')"
-                >Maintenance</x-button> --}}
+                >Maintenance</x-button>
 
                 <x-button
                     variant="sidebar"
