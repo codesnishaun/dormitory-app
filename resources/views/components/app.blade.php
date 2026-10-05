@@ -52,34 +52,44 @@
             <div>San Ildefonso, Bulacan · Prototype system</div>
         </footer>
     @else
-        <div class="flex min-h-screen flex-col md:flex-row">
-            <aside class="w-full shrink-0 border-b border-paper/10 bg-ink px-5 py-5 md:min-h-screen md:w-64 md:border-b-0 md:border-r">
+    <div class="flex h-screen flex-col overflow-hidden">
+        <div class="flex min-h-0 flex-1 flex-col md:flex-row">
+
+            {{-- Sidebar --}}
+            <aside class="flex min-h-0 w-full shrink-0 flex-col overflow-y-auto border-b border-paper/10 bg-ink px-5 py-5 md:w-70 md:border-b-0 md:border-r">
                 <a href="{{ route('home') }}" class="mb-6 flex items-center gap-2.5">
                     <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[conic-gradient(#C1712F_0deg_260deg,rgba(246,238,221,.18)_260deg_360deg)]">
                         <div class="h-[22px] w-[22px] rounded-full bg-ink"></div>
                     </div>
+
                     <div>
-                        <div class="font-display text-xl font-bold leading-none tracking-tight text-paper">DORA</div>
-                        <div class="-mt-0.5 text-[11px] uppercase tracking-widest text-paper/55">Cozy Haven Dormitory</div>
+                        <div class="font-display text-xl font-bold leading-none tracking-tight text-paper">
+                            DORA
+                        </div>
+
+                        <div class="-mt-0.5 text-[11px] uppercase tracking-widest text-paper/55">
+                            Cozy Haven Dormitory
+                        </div>
                     </div>
                 </a>
 
-                <nav aria-label="{{ ucfirst($navigation) }} navigation" class="flex flex-row gap-2 overflow-x-auto md:flex-col">
+                <nav
+                    aria-label="{{ ucfirst($navigation) }} navigation"
+                    class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+                >
+                    {{ $navigation }}
                     {{ $sidebar }}
                 </nav>
             </aside>
 
-            <div class="flex min-w-0 flex-1 flex-col">
-                <main class="flex-1 p-5 sm:p-8">
-                    {{ $slot }}
-                </main>
+            {{-- Main --}}
+            <main class="min-h-0 min-w-0 flex-1 overflow-y-auto bg-paper p-5 sm:p-8">
+                {{ $slot }}
+            </main>
 
-                <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-paper/[0.08] px-5 py-6 text-[13px] text-paper/55 sm:px-8">
-                    <div>© 2026 DORA — Dormitory Online Response Assistant, Cozy Haven.</div>
-                    <div>San Ildefonso, Bulacan · Prototype system</div>
-                </footer>
-            </div>
         </div>
+
+    </div>
     @endif
 </body>
 </html>
