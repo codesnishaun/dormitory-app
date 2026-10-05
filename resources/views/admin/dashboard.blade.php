@@ -1,4 +1,4 @@
-<x-admin-layout>
+<x-admin-layout body-class="min-h-screen bg-paper font-sans text-ink">
     <x-slot:title>
         Admin Dashboard
     </x-slot:title>
