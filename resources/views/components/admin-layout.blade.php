@@ -39,13 +39,13 @@
                     :active="request()->routeIs('admin.billing.index')"
                 >Biling</x-button>
 
-                {{-- <x-button
+               <x-button
                     variant="sidebar"
                     :href="route('admin.announcement.index')"
                     :active="request()->routeIs('admin.announcement.index')"
                 >Announcement</x-button>
 
-                <x-button
+                {{-- <x-button
                     variant="sidebar"
                     :href="route('admin.maintenance.index')"
                     :active="request()->routeIs('admin.maintenance.index')"
