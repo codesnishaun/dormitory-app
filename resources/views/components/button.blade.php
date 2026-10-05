@@ -33,30 +33,39 @@
 ])
  
 @php
-    $base = '
-        inline-flex 
-        items-center 
-        justify-center 
-        gap-2 
-        rounded-full 
-        font-semibold 
-        tracking-wide 
-        transition 
-        active:scale-[0.97] 
-        disabled:opacity-50 
-        disabled:cursor-not-allowed';
- 
-    $variants = [
-        'navigation' => '!rounded-xl border ' . 
-                    ($active ? 'text-copper bg-paper/[0.06] border-copper/10' : 'text-paper/75 bg-transparent border-transparent hover:text-copper hover:bg-paper/[0.06] hover:border-copper/30'),
-        'primary'    => 'bg-copper text-white hover:bg-copperDeep hover:-translate-y-px hover:text-paper',
-        'secondary'  => 'bg-paper/[0.08] text-paper border border-paper/[0.18] backdrop-blur-sm hover:bg-paper/[0.16] hover:border-paper/30',
-        'copper'     => 'bg-copper text-white hover:bg-copperDeep',
-        'teal'       => 'bg-teal text-white hover:bg-tealDeep',
-        'ghost'      => 'bg-transparent text-paper border border-paper/35 hover:border-paper',
-        'outline'    => 'bg-transparent text-ink border border-ink/[0.14] hover:border-ink',
-        'danger'     => 'bg-transparent text-danger border border-danger/40 hover:bg-danger/[0.08]',
-    ];
+   $base = '
+    inline-flex
+    items-center
+    justify-center
+    gap-2
+    rounded-full
+    font-semibold
+    tracking-wide
+    transition
+    active:scale-[0.97]
+    disabled:opacity-50
+    disabled:cursor-not-allowed
+';
+
+$variants = [
+    'navigation' => '!rounded-xl border ' .
+        ($active
+            ? 'text-copper bg-paper/[0.06] border-copper/10'
+            : 'text-paper/75 bg-transparent border-transparent hover:text-copper hover:bg-paper/[0.06] hover:border-copper/30'),
+
+    'sidebar' => 'w-full justify-start! whitespace-nowrap rounded-xl! px-4 py-2.5 text-sm font-medium! transition-colors ' .
+        ($active
+            ? 'bg-copper text-paper'
+            : 'text-paper/70 hover:bg-paper/10 hover:text-paper'),
+
+    'primary'   => 'bg-copper text-white hover:bg-copperDeep hover:-translate-y-px hover:text-paper',
+    'secondary' => 'bg-paper/[0.08] text-paper border border-paper/[0.18] backdrop-blur-sm hover:bg-paper/[0.16] hover:border-paper/30',
+    'copper'    => 'bg-copper text-white hover:bg-copperDeep',
+    'teal'      => 'bg-teal text-white hover:bg-tealDeep',
+    'ghost'     => 'bg-transparent text-paper border border-paper/35 hover:border-paper',
+    'outline'   => 'bg-transparent text-ink border border-ink/[0.14] hover:border-ink',
+    'danger'    => 'bg-transparent text-danger border border-danger/40 hover:bg-danger/[0.08]',
+];
  
     $sizes = [
         'md' => 'px-[22px] py-3 text-[14.5px]',
