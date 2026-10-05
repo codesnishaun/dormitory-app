@@ -27,13 +27,13 @@
                     :active="request()->routeIs('admin.tenant.index')"
                 >Tenants</x-button>
                 
-                {{-- <x-button
+                <x-button
                     variant="sidebar"
                     :href="route('admin.room.index')"
                     :active="request()->routeIs('admin.room.index')"
                 >Rooms &amp; Meters</x-button>
 
-                <x-button
+                {{-- <x-button
                     variant="sidebar"
                     :href="route('admin.billing.index')"
                     :active="request()->routeIs('admin.billing.index')"
