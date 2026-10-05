@@ -77,7 +77,6 @@
                     aria-label="{{ ucfirst($navigation) }} navigation"
                     class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
                 >
-                    {{ $navigation }}
                     {{ $sidebar }}
                 </nav>
             </aside>

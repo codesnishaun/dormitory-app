@@ -1,5 +1,5 @@
 @props([
-    'bodyClass' => 'min-h-screen bg-ink font-sans text-paper',
+    'bodyClass' => 'min-h-screen bg-paper font-sans text-ink',
 ])
 
 <x-app navigation="admin" :body-class="$bodyClass">
@@ -23,39 +23,39 @@
                 
                 <x-button
                     variant="sidebar"
-                    :href="route('application_form')"
-                    :active="request()->routeIs('application_form')"
+                    :href="route('admin.tenant.index')"
+                    :active="request()->routeIs('admin.tenant.index')"
                 >Tenants</x-button>
                 
-                <x-button
+                {{-- <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('admin.room.index')"
+                    :active="request()->routeIs('admin.room.index')"
                 >Rooms &amp; Meters</x-button>
 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('admin.billing.index')"
+                    :active="request()->routeIs('admin.billing.index')"
                 >Biling</x-button>
 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('admin.announcement.index')"
+                    :active="request()->routeIs('admin.announcement.index')"
                 >Announcement</x-button>
 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
-                >Maintenance</x-button>
+                    :href="route('admin.maintenance.index')"
+                    :active="request()->routeIs('admin.maintenance.index')"
+                >Maintenance</x-button> --}}
 
                 <x-button
                     variant="sidebar"
                     :href="route('home')"
                     :active="request()->routeIs('home')"
-                >Maintenance</x-button>
+                >Ask DORA</x-button>
                 
             </div>
 
