@@ -19,31 +19,31 @@
                     variant="sidebar"
                     :href="route('tenant.dashboard')"
                     :active="request()->routeIs('tenant.dashboard')"
-                >Dashboard</x-button>
+                ><x-svg-icon name="dashboard" />Dashboard</x-button>
                 
                 <x-button
                     variant="sidebar"
                     :href="route('application_form')"
                     :active="request()->routeIs('application_form')"
-                >My room &amp; bill</x-button>
+                ><x-svg-icon name="rooms" />My room &amp; bill</x-button>
                 
                 <x-button
                     variant="sidebar"
                     :href="route('home')"
                     :active="request()->routeIs('home')"
-                >Announcements</x-button>
+                ><x-svg-icon name="announcements" />Announcements</x-button>
 
                 <x-button
                     variant="sidebar"
                     :href="route('home')"
                     :active="request()->routeIs('home')"
-                >Maintenance</x-button>
+                ><x-svg-icon name="maintenance" />Maintenance</x-button>
 
                 <x-button
                     variant="sidebar"
                     :href="route('home')"
                     :active="request()->routeIs('home')"
-                >Ask DORA</x-button>
+                ><x-svg-icon name="assistant" />Ask DORA</x-button>
             </div>  
 
             <x-button
@@ -51,7 +51,7 @@
                 :href="route('home')"
                 class="mt-auto border-t border-paper/10 pt-4"
                 :active="request()->routeIs('home')"
-            >Logout</x-button>
+            ><x-svg-icon name="logout" />Logout</x-button>
         @endif
         
     </x-slot:sidebar>
