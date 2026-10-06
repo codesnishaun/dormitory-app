@@ -18,6 +18,8 @@
         $pastmeter = [
         ['2026-07-01','1140 -> 1182', '42', '₱504.00'],
         ['2026-06-01','1098 -> 1140', '42', '₱504.00']];
+        $payments = [
+        ['Payment','2026-08-01','G-cash','July rent + electric','-₱3,920.00']];
         $percent = 62;
         $prevReading = 1182;
         $currReading = 1219;
@@ -80,31 +82,42 @@
             
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <tr>
-                        <th class="text-xs uppercase tracking-widest border-b border-paper2 text-left">Cycle Date</th>
-                        <th class="text-xs uppercase tracking-widest border-b border-paper2 text-left">Prev->Curr</th>
-                        <th class="text-xs uppercase tracking-widest border-b border-paper2 text-left">KwH</th>
-                        <th class="text-xs uppercase tracking-widest border-b border-paper2 text-left">Amount</th>
+                    <tr class="border-b border-paper2">
+                        <th class="py-3 text-xs uppercase tracking-widest">Cycle Date</th>
+                        <th class="py-3 text-xs uppercase tracking-widest">Prev->Curr</th>
+                        <th class="py-3 text-xs uppercase tracking-widest">KwH</th>
+                        <th class="py-3 text-xs uppercase tracking-widest">Amount</th>
                     </tr>
                     @foreach ($pastmeter as [$cycledate,$prev_curr,$kwH,$amount])
-                    <tr>          
-                        <td class="font-mono border-b">
+                    <tr class="border-b border-paper2 last:border-0">          
+                        <td class="font-mono py-3">
                             {{$cycledate}}
                         </td>
-                        <td class="font-mono border-b">
+                        <td class="font-mono py-3">
                             {{$prev_curr}}
                         </td>
-                        <td class="font-mono border-b">
+                        <td class="font-mono py-3">
                             {{$kwH}}
                         </td>
-                        <td class="font-mono border-b last:border-0">
+                        <td class="font-mono py-3">
                             {{$amount}}
                         </td>    
                     </tr>
                     @endforeach
                 </table>
-
             </div>
+        </x-tenant-panel>
+        <x-tenant-panel title="Your Payment History" badge="Settled">
+            @foreach ($payments as [$name,$date,$mop,$note,$amount])
+            <div class="rounded-xl border border-paper2 p-4 flex justify-between">
+                <div>
+                    <div class="text-lg font-semibold">{{$name}}</div>
+                    <div class="text-xs text-inkSoft">{{$date}} · {{$mop}}</div>
+                    <div class="mt-3">{{$note}}</div>
+                </div>
+                <div class="font-mono font-semibold text-success">{{$amount}}</div>    
+            </div>
+            @endforeach
 
         </x-tenant-panel>
     </div>
