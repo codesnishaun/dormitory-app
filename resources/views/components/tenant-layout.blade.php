@@ -23,8 +23,8 @@
                 
                 <x-button
                     variant="sidebar"
-                    :href="route('application_form')"
-                    :active="request()->routeIs('application_form')"
+                    :href="route('tenant.room-bill')"
+                    :active="request()->routeIs('tenant.room-bill')"
                 ><x-svg-icon name="rooms" />My room &amp; bill</x-button>
                 
                 <x-button
