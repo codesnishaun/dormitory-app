@@ -1,5 +1,5 @@
 @props([
-    'bodyClass' => 'min-h-screen bg-paper font-sans text-ink',
+    'bodyClass' => 'h-dvh overflow-hidden bg-paper font-sans text-ink',
 ])
 
 <x-app navigation="admin" :body-class="$bodyClass">
