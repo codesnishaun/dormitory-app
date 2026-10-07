@@ -56,11 +56,11 @@
             <div>San Ildefonso, Bulacan · Prototype system</div>
         </footer>
     @else
-    <div class="flex h-full min-h-0 flex-col overflow-hidden">
+    <div class="flex h-dvh min-h-0 flex-col overflow-hidden">
         <div class="flex min-h-0 flex-1 flex-col md:flex-row">
 
             {{-- Sidebar --}}
-            <aside class="relative z-10 flex w-full shrink-0 flex-col border-b border-paper/10 bg-ink px-4 py-3 md:min-h-0 md:w-70 md:border-b-0 md:border-r md:px-5 md:py-5">
+            <aside class="relative z-10 flex w-full shrink-0 flex-col border-b border-paper/10 bg-ink px-4 py-3 md:min-h-0 md:w-70 md:overflow-y-auto md:border-b-0 md:border-r md:px-5 md:py-5">
                 <a href="{{ route('home') }}" class="mb-3 flex items-center gap-2.5 md:mb-6">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[conic-gradient(#C1712F_0deg_260deg,rgba(246,238,221,.18)_260deg_360deg)]">
                         <span class="h-[22px] w-[22px] rounded-full bg-ink"></span>
