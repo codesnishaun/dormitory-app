@@ -29,20 +29,20 @@
                 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('tenant.announcements')"
+                    :active="request()->routeIs('tenant.announcements')"
                 ><x-svg-icon name="announcements" />Announcements</x-button>
 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('tenant.maintenance')"
+                    :active="request()->routeIs('tenant.maintenance')"
                 ><x-svg-icon name="maintenance" />Maintenance</x-button>
 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('tenant.ask-dora')"
+                    :active="request()->routeIs('tenant.ask-dora')"
                 ><x-svg-icon name="assistant" />Ask DORA</x-button>
             </div>  
 
