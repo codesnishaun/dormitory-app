@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -20,6 +21,7 @@ class AuthController extends Controller
      */
     public function create()
     {
+        // 
     }
 
     /**
@@ -27,7 +29,35 @@ class AuthController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'login_role' => 'required|in:admin,tenant',
+        ]);
+
+        // Here you would typically authenticate the user
+        if (Auth::attempt([
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => $validated['login_role'],
+        ])) {
+            // Authentication successful
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            
+            return redirect()->route('tenant.dashboard');
+            
+        }
+
+        // Authentication failed
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
     }
 
     /**
@@ -57,8 +87,14 @@ class AuthController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home');
     }
 }

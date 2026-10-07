@@ -1,26 +1,12 @@
 /** @type {import('tailwindcss').Config} */
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                ink:        '#16231C',
-                inkSoft:    '#3C4A40',
-                paper:      '#F6EEDD',
-                paper2:     '#EDE2C6',
-                paper3:     '#FBF7EC',
-                copper:     '#C1712F',
-                copperDeep: '#9C5822',
-                teal:       '#2F6F6E',
-                tealDeep:   '#204E4D',
-                success:    '#4C7A50',
-                danger:     '#B33F3F',
-            },
-            fontFamily: {
-                display: ['Fraunces', 'serif'],
-                sans:    ['Inter', 'sans-serif'],
-                mono:    ['"IBM Plex Mono"', 'monospace'],
-            },
-        },
-    },
-};
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+});
