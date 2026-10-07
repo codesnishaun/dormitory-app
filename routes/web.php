@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/application_form', [ApplicationController::class, 'index'])->name('application_form');
 Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::post('/login', [AuthController::class, 'store'])->name('login.store');
+
+Route::get('/tenant', [TenantDashboardController::class, 'index'])->name('tenant.dashboard');
 Route::get('/tenant/room-bill',function () {return view('tenant.room-bill');})->name('tenant.room-bill');
 Route::get('/tenant/announcements',function () {return view('tenant.announcements');})->name('tenant.announcements');
 Route::get('/tenant/maintenance', function() {return view('tenant.maintenance');})->name('tenant.maintenance');
@@ -27,5 +30,4 @@ Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.b
 Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
 Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
 
-Route::get('/tenant', [TenantDashboardController::class, 'index'])->name('tenant.dashboard');
 
