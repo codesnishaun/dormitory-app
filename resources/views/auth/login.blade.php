@@ -31,7 +31,7 @@
         {{-- Admin login form --}}
             <form id="form-admin" method="POST" action="{{ route('login.store') }}" class="space-y-4">
                 @csrf
-                <input type="hidden" name="role" value="admin">
+                <input type="hidden" name="login_role" value="admin">
                 <div>
                     <x-form-input name="email" label="Email" placeholder="admin@example.com" required />
                 </div>
@@ -44,7 +44,7 @@
         {{-- Tenant login form --}}
             <form id="form-tenant" method="POST" action="{{ route('login.store') }}" class="space-y-4 hidden">
             @csrf
-            <input type="hidden" name="role" value="tenant">
+            <input type="hidden" name="login_role" value="tenant">
             <div>
                 <x-form-input name="email" label="Email" placeholder="juan@example.com" required />
             </div>
