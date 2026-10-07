@@ -59,13 +59,14 @@
                 
             </div>
 
-            <x-button
-                variant="sidebar"
-                :href="route('home')"
-                class="mt-auto border-t border-paper/10 pt-4"
-                :active="request()->routeIs('home')"
-            ><x-svg-icon name="logout" />Logout</x-button>
-            
+            <form action="{{ route('logout') }}" method="POST" class="mt-auto border-t border-paper/10 pt-4">
+                @csrf
+                <x-button
+                    variant="sidebar"
+                    type="submit"
+                    :active="request()->routeIs('home')"
+                ><x-svg-icon name="logout" />Logout</x-button>
+            </form>
         @endif
     </x-slot:sidebar>
 
