@@ -29,10 +29,11 @@
             @endif
     
         {{-- Admin login form --}}
-            <form id="form-admin" method="POST" action="" class="space-y-4">
+            <form id="form-admin" method="POST" action="{{ route('login.store') }}" class="space-y-4">
                 @csrf
+                <input type="hidden" name="role" value="admin">
                 <div>
-                    <x-form-input name="username" label="Username" placeholder="Admin" required />
+                    <x-form-input name="email" label="Email" placeholder="admin@example.com" required />
                 </div>
                 <div>
                     <x-form-input name="password" label="Password" placeholder="••••••••" type="password" required />
@@ -41,10 +42,11 @@
             </form>
     
         {{-- Tenant login form --}}
-            <form id="form-tenant" method="POST" action="" class="space-y-4 hidden">
+            <form id="form-tenant" method="POST" action="{{ route('login.store') }}" class="space-y-4 hidden">
             @csrf
+            <input type="hidden" name="role" value="tenant">
             <div>
-                <x-form-input name="name" label="Full name" placeholder="Juan Dela Cruz" required />
+                <x-form-input name="email" label="Email" placeholder="juan@example.com" required />
             </div>
             <div>
                 <x-form-input name="password" label="Password" placeholder="••••••••" type="password" required />

@@ -47,27 +47,17 @@
                 </dl>
             </div>
 
-            <div class="relative mx-auto w-full max-w-xl lg:ml-auto">
+            <div class="relative mx-auto w-full max-w-3xl lg:ml-auto">
                 <div class="absolute -right-4 -top-5 h-24 w-24 rounded-full bg-copper/20 blur-2xl sm:-right-6 sm:-top-7"></div>
                 <div class="absolute -bottom-5 -left-4 h-28 w-28 rounded-full bg-teal/30 blur-2xl sm:-bottom-7 sm:-left-6"></div>
 
+                {{-- Map Card --}}
                 <div class="relative rounded-[1.75rem] border border-paper/15 bg-paper3 p-3 shadow-2xl shadow-black/20 sm:p-4">
                     <div
                         id="location"
-                        class="relative min-h-[17rem] overflow-hidden rounded-[1.25rem] bg-paper2 sm:min-h-[22rem]"
+                        class="relative h-[20rem] w-full overflow-hidden rounded-[1.25rem] bg-paper2 sm:h-[22rem"
                         aria-label="Illustrated neighborhood map showing Cozy Haven in San Ildefonso, Bulacan"
                     > 
-
-                        <div class="absolute left-[48%] top-[39%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-                            <span class="flex h-12 w-12 items-center justify-center rounded-full border-4 border-white bg-copper text-white shadow-lg sm:h-14 sm:w-14">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-6 w-6" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-                                    <circle cx="12" cy="10" r="2.5" />
-                                </svg>
-                            </span>
-                            <span class="mt-2 rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-paper shadow-md">Byron & Aaron</span>
-                        </div>
-
                         <span class="absolute left-5 top-5 rounded-full border border-white/70 bg-paper3/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-inkSoft backdrop-blur sm:left-7 sm:top-7">
                             Location preview
                         </span>
