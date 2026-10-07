@@ -18,6 +18,7 @@ Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::get('/tenant/room-bill',function () {return view('tenant.room-bill');})->name('tenant.room-bill');
 Route::get('/tenant/announcements',function () {return view('tenant.announcements');})->name('tenant.announcements');
 Route::get('/tenant/maintenance', function() {return view('tenant.maintenance');})->name('tenant.maintenance');
+Route::get('/tenant/ask-dora', function() {return view('tenant.ask-dora');})->name('tenant.ask-dora');
 
 Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 Route::get('/admin/tenants', [TenantController::class, 'index'])->name('admin.tenant.index');

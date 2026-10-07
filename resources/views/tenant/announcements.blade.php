@@ -1,4 +1,4 @@
-<x-tenant-layout class="min-h-screen font-sans text-ink">
+<x-tenant-layout body-class="min-h-screen font-sans text-ink">
     <x-slot:title>Announcements - DORA</x-slot:title>
 
     <x-header title="Announcments" description="Notices from Cozy Haven management."/>
@@ -12,14 +12,14 @@
 
     <x-tenant-panel>
         <div class="flex flex-col gap-3">
-            @foreach ($announcements as [$pinned,$title,$date,$author,$body])
-            <div class="rounded-xl border p-4 {{$pinned ? 'border-copper bg-copper-10' : 'border-paper2'}}">
+            @foreach ($announcements as [$pinned,$heading,$date,$author,$body])
+            <div class="rounded-xl border p-4 {{$pinned ? 'border-copper bg-copper/10' : 'border-paper2'}}">
                 <div class="font-display text-[17px] font-bold text-ink">
                     
                     @if ($pinned)
                     📌
                     @endif
-                    {{$title}}
+                    {{$heading}}
                 </div>
                 <div class="text-xs font-sans text-inkSoft">{{$date}} · {{$author}}</div>
                 <div class="font-sans text-sm leading-relaxed text-inkSoft">{{$body}}</div>
