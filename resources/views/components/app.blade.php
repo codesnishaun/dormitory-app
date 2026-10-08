@@ -29,21 +29,51 @@
             </a>
 
             <div class="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
-                <x-button
-                    variant="navigation"
-                    size="sm"
-                    :href="route('application_form')"
-                    :active="request()->routeIs('application_form')"
-                    class="whitespace-nowrap !px-3 sm:!px-4"
-                >Apply<span class="hidden sm:inline"> for a room</span></x-button>
+                @auth
+                    @if (auth()->user()->role === 'admin')
+                        <x-button
+                            variant="navigation"
+                            size="sm"
+                            :href="route('admin.dashboard')"
+                            :active="request()->routeIs('admin.*')"
+                            class="whitespace-nowrap !px-3 sm:!px-4"
+                        >Dashboard</x-button>
+                    @else
+                        <x-button
+                            variant="navigation"
+                            size="sm"
+                            :href="route('tenant.dashboard')"
+                            :active="request()->routeIs('tenant.*')"
+                            class="whitespace-nowrap !px-3 sm:!px-4"
+                        >Dashboard</x-button>
+                    @endif
 
-                <x-button
-                    variant="navigation"
-                    size="sm"
-                    :href="route('login')"
-                    :active="request()->routeIs('login')"
-                    class="whitespace-nowrap !px-3 sm:!px-4"
-                >Log in</x-button>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <x-button
+                            variant="navigation"
+                            size="sm"
+                            type="submit"
+                            class="whitespace-nowrap !px-3 sm:!px-4"
+                        >Log out</x-button>
+                    </form>
+                @else
+                    <x-button
+                        variant="navigation"
+                        size="sm"
+                        :href="route('application_form')"
+                        :active="request()->routeIs('application_form')"
+                        class="whitespace-nowrap !px-3 sm:!px-4"
+                    >Apply<span class="hidden sm:inline"> for a room</span></x-button>
+
+                    <x-button
+                        variant="navigation"
+                        size="sm"
+                        :href="route('login')"
+                        :active="request()->routeIs('login')"
+                        class="whitespace-nowrap !px-3 sm:!px-4"
+                    >Log in</x-button>
+                @endauth
             </div>
         </nav>
 
