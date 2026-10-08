@@ -34,7 +34,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
     Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
+    Route::get('/admin/ask-dora', function () {
+        return view('admin.ask-dora');
+    })->name('admin.ask-dora');
 });
-
-
 
