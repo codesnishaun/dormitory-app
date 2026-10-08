@@ -34,7 +34,7 @@
                     <span aria-hidden="true">{{$icon}}</span>
                     <div>
                         <div class="text-sm font-semibold">{{$label}}</div>
-                        <div class="text-[13px] text-inkSoft">{{$value}}</div>
+                        <div class="text-[13px] text-inkSoft">{{$value}}</div>  
                     </div>
                 </div>
             @endforeach

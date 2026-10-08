@@ -4,7 +4,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="{{ $navigation !== 'guest' ? 'h-full overflow-hidden' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,7 +56,7 @@
             <div>San Ildefonso, Bulacan · Prototype system</div>
         </footer>
     @else
-    <div class="flex min-h-screen flex-col md:h-screen md:overflow-hidden">
+    <div class="flex h-dvh min-h-0 flex-col overflow-hidden">
         <div class="flex min-h-0 flex-1 flex-col md:flex-row">
 
             {{-- Sidebar --}}
@@ -94,7 +94,7 @@
                         <x-svg-icon name="close" class="close-icon hidden h-5 w-5" />
                     </label>
 
-                    <div id="sidebar-navigation" class="hidden max-h-[calc(100dvh-4rem)] flex-col gap-3 overflow-y-auto border-t border-paper/10 pt-4 peer-checked:flex md:flex md:max-h-none md:flex-1 md:overflow-visible md:border-t-0 md:pt-0">
+                    <div id="sidebar-navigation" class="hidden flex-col gap-3 border-t border-paper/10 pt-4 peer-checked:flex md:flex md:flex-1 md:border-t-0 md:pt-0">
                         <nav
                             aria-label="{{ ucfirst($navigation) }} navigation"
                             class="flex min-h-0 flex-1 flex-col gap-2"
@@ -106,7 +106,7 @@
             </aside>
 
             {{-- Main --}}
-            <main class="min-h-0 min-w-0 flex-1 overflow-y-auto bg-paper p-4 sm:p-8">
+            <main class="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain bg-paper p-4 sm:p-8">
                 {{ $slot }}
             </main>
 
