@@ -53,8 +53,8 @@
 
                 <x-button
                     variant="sidebar"
-                    :href="route('home')"
-                    :active="request()->routeIs('home')"
+                    :href="route('admin.ask-dora')"
+                    :active="request()->routeIs('admin.ask-dora')"
                 ><x-svg-icon name="assistant" />Ask DORA</x-button>
                 
             </div>

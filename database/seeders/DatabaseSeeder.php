@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             'role'     => 'admin',
         ]);
 
-        User::create([
+        User::factory()->create([
             'name'     => 'Juan Dela Cruz',
             'email'    => 'juan@dora.test',
             'password' => 'tenant123',
