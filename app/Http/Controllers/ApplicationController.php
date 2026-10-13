@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Application;
 
 class ApplicationController extends Controller
 {
@@ -27,7 +28,18 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name'         => 'required|string|max:255',
+            'contact'      => 'required|string|max:50',
+            'email'        => 'nullable|email|max:255',
+            'desired_room' => 'nullable|string|max:100',
+            'move_in_date' => 'nullable|date',
+            'message'      => 'nullable|string|max:1000',
+        ]);
+
+        Application::create($validated);
+
+        return redirect()->route('application_form')->with('applied', true);
     }
 
     /**
