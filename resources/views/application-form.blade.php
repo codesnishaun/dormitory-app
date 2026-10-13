@@ -117,9 +117,10 @@
                                     <x-form-input
                                         name="email"
                                         type="email"
-                                        label="Email address"
+                                        label="Email address *"
                                         placeholder="you@example.com"
                                         autocomplete="email"
+                                        required
                                     />
                                 </div>
 
