@@ -93,7 +93,7 @@
                             <div class="grid gap-5 sm:grid-cols-2">
                                 <div class="sm:col-span-2">
                                     <x-form-input
-                                        name="name"
+                                        name="applicant_name"
                                         label="Full name *"
                                         placeholder="e.g. Juan Dela Cruz"
                                         autocomplete="name"
@@ -103,7 +103,7 @@
 
                                 <div>
                                     <x-form-input
-                                        name="contact"
+                                        name="phone"
                                         type="tel"
                                         label="Contact number *"
                                         placeholder="0917 000 0000"
@@ -126,7 +126,7 @@
 
                                 <div>
                                     <x-form-input
-                                        name="desired_room"
+                                        name="preferred_room_id"
                                         type="select"
                                         label="Preferred room"
                                         :options="[
@@ -151,6 +151,7 @@
                                         label="Preferred move-in date"
                                         :value="now()->toDateString()"
                                         :min="now()->toDateString()"
+                                        required
                                     />
                                 </div>
 
