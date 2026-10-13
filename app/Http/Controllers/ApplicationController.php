@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Application;
+use App\Models\Room;
 
 class ApplicationController extends Controller
 {
@@ -11,7 +13,9 @@ class ApplicationController extends Controller
      */
     public function index()
     {
-        return view('application-form');
+        $rooms = Room::all();
+
+    return view('application-form', compact('rooms'));
     }
 
     /**
@@ -27,7 +31,18 @@ class ApplicationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+        'applicant_name'    => 'required|string|max:255',
+        'phone'             => 'required|string|max:30',
+        'email'             => 'required|email|max:255',
+        'preferred_room_id' => 'nullable|exists:rooms,id',
+        'move_in_date'      => 'required|date|after_or_equal:today',
+        'message'           => 'nullable|string|max:1000',
+    ]);
+
+    Application::create($validated);
+
+    return redirect()->route('application_form')->with('applied', true);
     }
 
     /**
