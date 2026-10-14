@@ -129,17 +129,7 @@
                                         name="preferred_room_id"
                                         type="select"
                                         label="Preferred room"
-                                        :options="[
-                                            '' => 'No preference',
-                                            'R101' => 'Room R101',
-                                            'R102' => 'Room R102',
-                                            'R103' => 'Room R103',
-                                            'R104' => 'Room R104',
-                                            'R201' => 'Room R201',
-                                            'R202' => 'Room R202',
-                                            'R203' => 'Room R203',
-                                            'R204' => 'Room R204',
-                                        ]"
+                                        :options="$roomOptions"
                                     />
                                     <p class="mt-1.5 text-xs text-inkSoft">Room assignment depends on availability.</p>
                                 </div>
