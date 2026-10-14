@@ -27,6 +27,13 @@ return new class extends Migration
                   ->unique()
                   ->constrained('applications')
                   ->restrictOnDelete();
+
+            $table->enum('status', [
+                'reserved',
+                'occupied',
+                'ended',
+                'cancelled',
+            ])->default('reserved');
             
             $table->date('start_date');
             $table->date('end_date')->nullable();
