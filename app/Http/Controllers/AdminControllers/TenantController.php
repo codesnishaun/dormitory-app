@@ -14,6 +14,14 @@ class TenantController extends Controller
             ->with('preferredRoom')
             ->latest()
             ->get();
-        return view('admin.tenant.index', compact('pendingApplications'));
+
+        $reviewedApplications = Application::query()
+            ->whereIn('status', ['approved', 'rejected'])
+            ->with('preferredRoom')
+            ->orderByDesc('reviewed_at')
+            ->take(5)
+            ->get();
+            
+        return view('admin.tenant.index', compact('pendingApplications', 'reviewedApplications'));
     }
 }
