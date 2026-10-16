@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->string('room_number')->unique();
-            $table->unsignedTinyInteger('floor_number');
             $table->unsignedTinyInteger('capacity');
             $table->decimal('monthly_rent', 10, 2);
             $table->string('submeter_number')->nullable()->unique();

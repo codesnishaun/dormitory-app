@@ -1,32 +1,6 @@
 <x-admin-layout>
     <x-slot:title>Rooms &amp; Meters</x-slot:title>
 
-   @php
-        // Sample rooms (preview data) stay as they were.
-        $sampleRooms = [
-            ['number' => 'R101', 'floor' => 'Floor 1', 'type' => 'Single', 'rent' => 3500, 'tenants' => [['name' => 'Marianne Santos', 'initials' => 'MS']], 'occupancy' => '1/1 occupied', 'status' => 'occupied', 'current' => 1219, 'previous' => 1182, 'usage' => 37, 'percent' => 62, 'rate' => 12, 'updated' => 'Oct 01, 2026'],
-            ['number' => 'R102', 'floor' => 'Floor 1', 'type' => 'Single', 'rent' => 3500, 'tenants' => [['name' => 'Jomar Cruz', 'initials' => 'JC']], 'occupancy' => '1/1 occupied', 'status' => 'occupied', 'current' => 990, 'previous' => 948, 'usage' => 42, 'percent' => 70, 'rate' => 12, 'updated' => 'Oct 01, 2026'],
-            ['number' => 'R103', 'floor' => 'Floor 1', 'type' => 'Shared', 'rent' => 2800, 'tenants' => [['name' => 'Angeline Reyes', 'initials' => 'AR'], ['name' => 'Bea Villanueva', 'initials' => 'BV']], 'occupancy' => '2/2 occupied', 'status' => 'occupied', 'current' => 2265, 'previous' => 2210, 'usage' => 55, 'percent' => 92, 'rate' => 12, 'updated' => 'Oct 02, 2026'],
-            ['number' => 'R104', 'floor' => 'Floor 1', 'type' => 'Shared', 'rent' => 2800, 'tenants' => [['name' => 'Carlo Mendoza', 'initials' => 'CM']], 'occupancy' => '1/2 occupied', 'status' => 'occupied', 'current' => 1780, 'previous' => 1750, 'usage' => 30, 'percent' => 50, 'rate' => 12, 'updated' => 'Oct 02, 2026'],
-            ['number' => 'R201', 'floor' => 'Floor 2', 'type' => 'Single', 'rent' => 3800, 'tenants' => [['name' => 'Dianne Aquino', 'initials' => 'DA']], 'occupancy' => '1/1 occupied', 'status' => 'occupied', 'current' => 905, 'previous' => 860, 'usage' => 45, 'percent' => 75, 'rate' => 12, 'updated' => 'Oct 03, 2026'],
-            ['number' => 'R202', 'floor' => 'Floor 2', 'type' => 'Single', 'rent' => 3800, 'tenants' => [], 'occupancy' => 'Vacant', 'status' => 'vacant', 'current' => 1120, 'previous' => 1120, 'usage' => 0, 'percent' => 0, 'rate' => 12, 'updated' => 'Sep 01, 2026'],
-            ['number' => 'R203', 'floor' => 'Floor 2', 'type' => 'Shared', 'rent' => 3000, 'tenants' => [['name' => 'Liza Mercado', 'initials' => 'LM']], 'occupancy' => '1/2 occupied', 'status' => 'reading_due', 'current' => 1540, 'previous' => 1502, 'usage' => 38, 'percent' => 64, 'rate' => 12, 'updated' => 'Sep 18, 2026'],
-            ['number' => 'R204', 'floor' => 'Floor 2', 'type' => 'Single', 'rent' => 3800, 'tenants' => [['name' => 'Paolo Dela Cruz', 'initials' => 'PD']], 'occupancy' => '1/1 occupied', 'status' => 'occupied', 'current' => 2024, 'previous' => 1979, 'usage' => 45, 'percent' => 75, 'rate' => 12, 'updated' => 'Oct 03, 2026'],
-        ];
-
-        // Sample rooms first, then rooms added through the modal (added rooms go at the end).
-        // If an added room has the same number as a sample room, the saved one replaces it.
-        $rooms = collect($sampleRooms)->keyBy('number')
-            ->merge(collect($savedRooms)->keyBy('number'))
-            ->values()
-            ->all();
-
-        $occupiedRooms = count(array_filter($rooms, fn ($room) => in_array($room['status'], ['occupied', 'reading_due'], true)));
-        $vacantRooms = count(array_filter($rooms, fn ($room) => $room['status'] === 'vacant'));
-        $readingsDue = count(array_filter($rooms, fn ($room) => $room['status'] === 'reading_due'));
-        $floorCount = collect($rooms)->pluck('floor')->unique()->count();
-    @endphp
-
     <div class="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8">
         <header class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div class="max-w-2xl">
@@ -36,14 +10,8 @@
                 </div>
                 <h1 class="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">Rooms &amp; meters</h1>
                 <p class="mt-2 text-sm leading-6 text-inkSoft sm:text-base">
-                    Keep occupancy in view and record each room's latest electricity reading.
+                    Review room availability, capacity, rent, and meter details.
                 </p>
-            </div>
-            <div class="flex shrink-0 items-center gap-2 rounded-xl border border-copper/15 bg-paper3 px-3.5 py-2.5 text-xs leading-5 text-inkSoft sm:max-w-xs">
-                <svg class="h-4 w-4 shrink-0 text-copper" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M10 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm0 3a.75.75 0 0 1 .75.75v4a.75.75 0 0 1-1.5 0v-4A.75.75 0 0 1 10 5Zm0 8.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-                </svg>
-                <span><strong class="font-semibold text-ink">Rooms are saved.</strong> Tenant names and meter readings are still preview data.</span>
             </div>
         </header>
 
@@ -52,18 +20,18 @@
         @endif
 
         <section class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4" aria-label="Room summary">
-            <x-admin.room-stat title="Total rooms" :value="count($rooms)" :description="'Across ' . $floorCount . ' floors'" tone="ink">
+            <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
                 <x-svg-icon name="rooms" class="h-4 w-4" />
             </x-admin.room-stat>
-            <x-admin.room-stat title="Occupied" :value="$occupiedRooms" description="Rooms with residents" tone="success">
+            <x-admin.room-stat title="Occupied" :value="$occupiedRooms" description="Marked as occupied" tone="success">
                 <x-svg-icon name="tenants" class="h-4 w-4" />
             </x-admin.room-stat>
-            <x-admin.room-stat title="Vacant" :value="$vacantRooms" description="Ready for a new tenant" tone="copper">
+            <x-admin.room-stat title="Available" :value="$availableRooms" description="Ready for applications" tone="copper">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                     <path d="M3 17V5.5L10 2l7 3.5V17M7 17v-5h6v5M6 7h.01M10 7h.01M14 7h.01" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </x-admin.room-stat>
-            <x-admin.room-stat title="Reading due" :value="$readingsDue" description="Meter needs an update" tone="danger">
+            <x-admin.room-stat title="Reserved" :value="$reservedRooms" description="Marked as reserved" tone="copper">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                     <circle cx="10" cy="10" r="7.25" />
                     <path d="M10 5.75v4.5l2.75 1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -75,7 +43,7 @@
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 id="room-list-heading" class="font-display text-xl font-bold text-ink">All rooms</h2>
-                    <p class="mt-1 text-xs text-inkSoft">{{ count($rooms) }} rooms</p>
+                    <p class="mt-1 text-xs text-inkSoft">{{ $rooms->count() }} rooms</p>
                 </div>
                 <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                     <label class="relative block min-w-0 flex-1 sm:w-64">
@@ -95,21 +63,25 @@
                     <div class="flex gap-1 overflow-x-auto rounded-xl border border-ink/8 bg-paper3 p-1" aria-label="Room filters">
                         <button type="button" data-filter="all" class="shrink-0 rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-paper">All</button>
                         <button type="button" data-filter="occupied" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-inkSoft transition hover:bg-ink/5">Occupied</button>
-                        <button type="button" data-filter="vacant" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-inkSoft transition hover:bg-ink/5">Vacant</button>
-                        <button type="button" data-filter="reading-due" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-inkSoft transition hover:bg-ink/5">Reading due</button>
+                        <button type="button" data-filter="available" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-inkSoft transition hover:bg-ink/5">Available</button>
+                        <button type="button" data-filter="reserved" class="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-inkSoft transition hover:bg-ink/5">Reserved</button>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                @foreach ($rooms as $room)
+                @forelse ($rooms as $room)
                     <div data-room-card
-                         data-status="{{ $room['status'] }}"
-                         data-search="{{ strtolower($room['number'] . ' ' . collect($room['tenants'])->pluck('name')->implode(' ')) }}"
+                         data-status="{{ $room->status }}"
+                         data-search="{{ strtolower($room->room_number) }}"
                          class="h-full [&>*]:h-full">
                         <x-admin.room-card :room="$room" />
                     </div>
-                @endforeach
+                @empty
+                    <p class="rounded-xl border border-dashed border-ink/15 bg-paper3 p-6 text-center text-sm text-inkSoft md:col-span-2 xl:col-span-3">
+                        No rooms have been added yet.
+                    </p>
+                @endforelse
             </div>
 
             <p id="room-empty" class="hidden py-10 text-center text-sm text-inkSoft">No rooms match your filter.</p>
@@ -138,16 +110,10 @@
                        class="mt-1 h-11 w-full rounded-xl border border-ink/10 bg-paper px-3 text-sm font-normal">
             </label>
 
-            <div class="grid grid-cols-2 gap-4">
-                <label class="text-sm font-semibold text-ink">Floor
-                    <input type="number" name="floor_number" value="{{ old('floor_number') }}" min="1" required
-                           class="mt-1 h-11 w-full rounded-xl border border-ink/10 bg-paper px-3 text-sm font-normal">
-                </label>
-                <label class="text-sm font-semibold text-ink">Capacity
-                    <input type="number" name="capacity" value="{{ old('capacity', 1) }}" min="1" required
-                           class="mt-1 h-11 w-full rounded-xl border border-ink/10 bg-paper px-3 text-sm font-normal">
-                </label>
-            </div>
+            <label class="text-sm font-semibold text-ink">Capacity
+                <input type="number" name="capacity" value="{{ old('capacity', 1) }}" min="1" required
+                       class="mt-1 h-11 w-full rounded-xl border border-ink/10 bg-paper px-3 text-sm font-normal">
+            </label>
 
             <label class="text-sm font-semibold text-ink">Monthly rent (₱)
                 <input type="number" step="0.01" name="monthly_rent" value="{{ old('monthly_rent') }}" min="0" required
@@ -178,12 +144,6 @@
             const tabs   = document.querySelectorAll('[data-filter]');
             const search = document.getElementById('room-search');
             const empty  = document.getElementById('room-empty');
-            const groups = {
-                'all': null,
-                'occupied': ['occupied', 'reading_due'],
-                'vacant': ['vacant'],
-                'reading-due': ['reading_due'],
-            };
             let active = 'all';
 
             function apply() {
@@ -191,15 +151,14 @@
                 let shown = 0;
 
                 cards.forEach(card => {
-                    const allowed  = groups[active];
-                    const okTab    = !allowed || allowed.includes(card.dataset.status);
+                    const okTab    = active === 'all' || card.dataset.status === active;
                     const okSearch = !q || card.dataset.search.includes(q);
                     const show = okTab && okSearch;
                     card.classList.toggle('hidden', !show);
                     if (show) shown++;
                 });
 
-                empty.classList.toggle('hidden', shown > 0);
+                empty.classList.toggle('hidden', shown > 0 || cards.length === 0);
 
                 tabs.forEach(tab => {
                     const on = tab.dataset.filter === active;
