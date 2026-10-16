@@ -22,32 +22,28 @@
         @if (session('success'))
             <div class="rounded-xl bg-success/15 px-4 py-3 text-sm text-success">{{ session('success') }}</div>
         @endif
-
-        @if (session('error'))
-            <div class="rounded-xl bg-danger/15 px-4 py-3 text-sm text-danger">{{ session('error') }}</div>
-        @endif
-
+        
         <section class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4" aria-label="Room summary">
             <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
-            <x-svg-icon name="rooms" class="h-4 w-4" />
+                <x-svg-icon name="rooms" class="h-4 w-4" />
             </x-admin.room-stat>
 
             <x-admin.room-stat title="Occupied" :value="$occupiedRooms" description="Marked as occupied" tone="success">
-            <x-svg-icon name="tenants" class="h-4 w-4" />
+                <x-svg-icon name="tenants" class="h-4 w-4" />
             </x-admin.room-stat>
 
             <x-admin.room-stat title="Available" :value="$availableRooms" description="Ready for applications" tone="copper">
-            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                <path d="M3 17V5.5L10 2l7 3.5V17M7 17v-5h6v5M6 7h.01M10 7h.01M14 7h.01" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <path d="M3 17V5.5L10 2l7 3.5V17M7 17v-5h6v5M6 7h.01M10 7h.01M14 7h.01" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
             </x-admin.room-stat>
 
             <x-admin.room-stat title="Reserved" :value="$reservedRooms" description="Marked as reserved" tone="copper">
-            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                <circle cx="10" cy="10" r="7.25" />
-                <path d="M10 5.75v4.5l2.75 1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-        </x-admin.room-stat>
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                    <circle cx="10" cy="10" r="7.25" />
+                    <path d="M10 5.75v4.5l2.75 1.5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </x-admin.room-stat>
         </section>
 
         <section class="space-y-4" aria-labelledby="room-list-heading">
