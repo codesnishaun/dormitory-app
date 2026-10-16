@@ -6,6 +6,7 @@ use App\Models\Application;
 use App\Models\Room;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
 {
@@ -21,14 +22,6 @@ class ApplicationController extends Controller
             ->prepend('No preference', '');
 
         return view('application-form', compact('roomOptions'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -50,35 +43,5 @@ class ApplicationController extends Controller
         return redirect()->route('application_form')->with('applied', true);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    
 }
