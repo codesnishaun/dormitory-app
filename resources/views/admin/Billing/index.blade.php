@@ -24,7 +24,7 @@
         $tenantsInGoodStanding = count(array_filter($tenantBalances, fn ($tenant) => $tenant['balance'] === 0));
     @endphp
 
-    <div class="mx-auto w-full max-w-[1440px] space-y-6 pb-4 sm:space-y-8">
+    <div class="mx-auto w-full space-y-6 pb-4 sm:space-y-8">
         {{-- Billing overview and quick context. --}}
         <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>

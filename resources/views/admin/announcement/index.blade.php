@@ -60,7 +60,7 @@
         $pinnedCount = count(array_filter($publishedAnnouncements, fn ($announcement) => $announcement['pinned']));
     @endphp
 
-    <div class="mx-auto w-full max-w-[1440px] space-y-6 pb-4 sm:space-y-8">
+    <div class="mx-auto w-full space-y-6 pb-4 sm:space-y-8">
         {{-- Page title and context. --}}
         <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div class="space-y-2">

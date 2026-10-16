@@ -21,7 +21,7 @@
         @if (session('success'))
             <div class="rounded-xl bg-success/15 px-4 py-3 text-sm text-success">{{ session('success') }}</div>
         @endif
-
+        
         <section class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4" aria-label="Room summary">
             <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
             <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
