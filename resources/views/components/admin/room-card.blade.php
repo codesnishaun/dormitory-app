@@ -35,19 +35,23 @@
             </div>
         </dl>
 
-        <div class="mt-3 flex justify-end gap-2 border-t border-ink/6 pt-3">
-            <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-inkSoft transition hover:bg-teal/8 hover:text-teal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                    <path d="m10.8 2.7 2.5 2.5M3 13l2.7-.5 7.6-7.6a1.8 1.8 0 0 0-2.5-2.5l-7.6 7.6L3 13Z" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                Edit
-            </button>
-            <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-danger transition hover:bg-danger/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                    <path d="M2.5 4.5h11M6 4.5V2.7h4v1.8m-6.2 0 .6 8.8h7.2l.6-8.8M6.5 7v3.5m3-3.5v3.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                Delete
-            </button>
+       <div class="mt-3 flex justify-end gap-2 border-t border-ink/6 pt-3">
+        <button type="button"
+            onclick="openEditRoom(@js($room->only(['id', 'room_number', 'capacity', 'monthly_rent', 'submeter_number', 'status'])))"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-inkSoft transition hover:bg-teal/8 hover:text-teal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="m10.8 2.7 2.5 2.5M3 13l2.7-.5 7.6-7.6a1.8 1.8 0 0 0-2.5-2.5l-7.6 7.6L3 13Z" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Edit
+        </button>
+        <button type="button"
+            onclick="openDeleteRoom({{ $room->id }}, @js($room->room_number))"
+            class="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-semibold text-danger transition hover:bg-danger/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M2.5 4.5h11M6 4.5V2.7h4v1.8m-6.2 0 .6 8.8h7.2l.6-8.8M6.5 7v3.5m3-3.5v3.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Delete
+        </button>
         </div>
     </div>
 </article>

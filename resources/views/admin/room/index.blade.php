@@ -1,9 +1,11 @@
- @include('admin.room.create')
- 
+@include('admin.room.create')
+@include('admin.room.edit')
+@include('admin.room.delete')
+
 <x-admin-layout>
     <x-slot:title>Rooms &amp; Meters</x-slot:title>
 
-    <div class="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8">
+    <div class="mx-auto w-full space-y-6 sm:space-y-8">
         <header class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div class="max-w-2xl">
                 <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-teal/15 bg-teal/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-teal">
@@ -25,14 +27,17 @@
             <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
                 <x-svg-icon name="rooms" class="h-4 w-4" />
             </x-admin.room-stat>
+
             <x-admin.room-stat title="Occupied" :value="$occupiedRooms" description="Marked as occupied" tone="success">
                 <x-svg-icon name="tenants" class="h-4 w-4" />
             </x-admin.room-stat>
+
             <x-admin.room-stat title="Available" :value="$availableRooms" description="Ready for applications" tone="copper">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                     <path d="M3 17V5.5L10 2l7 3.5V17M7 17v-5h6v5M6 7h.01M10 7h.01M14 7h.01" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </x-admin.room-stat>
+
             <x-admin.room-stat title="Reserved" :value="$reservedRooms" description="Marked as reserved" tone="copper">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                     <circle cx="10" cy="10" r="7.25" />
