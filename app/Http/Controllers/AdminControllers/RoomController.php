@@ -5,6 +5,8 @@ namespace App\Http\Controllers\AdminControllers;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
@@ -24,5 +26,20 @@ class RoomController extends Controller
             'availableRooms',
             'reservedRooms',
         ));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'room_number'     => ['required', 'string', 'max:20', 'unique:rooms,room_number'],
+            'capacity'        => ['required', 'integer', 'min:1', 'max:10'],
+            'monthly_rent'    => ['required', 'numeric', 'min:0'],
+            'submeter_number' => ['nullable', 'string', 'max:50', 'unique:rooms,submeter_number'],
+        ]);
+
+        // New rooms start as "available"
+        Room::create($data + ['status' => 'available']);
+
+        return redirect()->route('admin.room.index')->with('success', 'Room added.');
     }
 }

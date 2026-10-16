@@ -32,6 +32,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/tenants', [TenantController::class, 'index'])->name('admin.tenant.index');
     Route::get('/admin/rooms', [RoomController::class, 'index'])->name('admin.room.index');
+    Route::post('/admin/rooms', [RoomController::class, 'store'])->name('admin.room.store');
     Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
     Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
