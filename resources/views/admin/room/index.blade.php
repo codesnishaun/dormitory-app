@@ -1,5 +1,7 @@
- @include('admin.room.create')
- 
+@include('admin.room.create')
+@include('admin.room.edit')
+@include('admin.room.delete')
+
 <x-admin-layout>
     <x-slot:title>Rooms &amp; Meters</x-slot:title>
 
@@ -13,7 +15,6 @@
                 <h1 class="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">Rooms &amp; meters</h1>
                 <p class="mt-2 text-sm leading-6 text-inkSoft sm:text-base">
                     Review room availability, capacity, rent, and meter details.
-                    Review room availability, capacity, rent, and meter details.
                 </p>
             </div>
         </header>
@@ -22,35 +23,37 @@
             <div class="rounded-xl bg-success/15 px-4 py-3 text-sm text-success">{{ session('success') }}</div>
         @endif
 
+        @if (session('error'))
+            <div class="rounded-xl bg-danger/15 px-4 py-3 text-sm text-danger">{{ session('error') }}</div>
+        @endif
+
         <section class="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4" aria-label="Room summary">
             <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
-            <x-admin.room-stat title="Total rooms" :value="$rooms->count()" description="Current inventory" tone="ink">
-                <x-svg-icon name="rooms" class="h-4 w-4" />
+            <x-svg-icon name="rooms" class="h-4 w-4" />
             </x-admin.room-stat>
+
             <x-admin.room-stat title="Occupied" :value="$occupiedRooms" description="Marked as occupied" tone="success">
-            <x-admin.room-stat title="Occupied" :value="$occupiedRooms" description="Marked as occupied" tone="success">
-                <x-svg-icon name="tenants" class="h-4 w-4" />
+            <x-svg-icon name="tenants" class="h-4 w-4" />
             </x-admin.room-stat>
+
             <x-admin.room-stat title="Available" :value="$availableRooms" description="Ready for applications" tone="copper">
-            <x-admin.room-stat title="Available" :value="$availableRooms" description="Ready for applications" tone="copper">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                    <path d="M3 17V5.5L10 2l7 3.5V17M7 17v-5h6v5M6 7h.01M10 7h.01M14 7h.01" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M3 17V5.5L10 2l7 3.5V17M7 17v-5h6v5M6 7h.01M10 7h.01M14 7h.01" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             </x-admin.room-stat>
+
             <x-admin.room-stat title="Reserved" :value="$reservedRooms" description="Marked as reserved" tone="copper">
-            <x-admin.room-stat title="Reserved" :value="$reservedRooms" description="Marked as reserved" tone="copper">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                    <circle cx="10" cy="10" r="7.25" />
-                    <path d="M10 5.75v4.5l2.75 1.5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-            </x-admin.room-stat>
+            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <circle cx="10" cy="10" r="7.25" />
+                <path d="M10 5.75v4.5l2.75 1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </x-admin.room-stat>
         </section>
 
         <section class="space-y-4" aria-labelledby="room-list-heading">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 id="room-list-heading" class="font-display text-xl font-bold text-ink">All rooms</h2>
-                    <p class="mt-1 text-xs text-inkSoft">{{ $rooms->count() }} rooms</p>
                     <p class="mt-1 text-xs text-inkSoft">{{ $rooms->count() }} rooms</p>
                 </div>
                 <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
