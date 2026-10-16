@@ -9,11 +9,6 @@
         ['name' => 'Ederick Bautista', 'email' => 'ederick.bautista@example.com', 'room' => 'R203', 'contact' => '0928 331 9905', 'moveIn' => '2025-12-12', 'balance' => '—'],
     ];
 
-    $reviewedApplications = [
-        ['name' => 'Miguel Torres', 'reviewedAt' => '2026-08-30', 'room' => 'R204', 'status' => 'Rejected', 'note' => 'Not specified.'],
-        ['name' => 'Katrina Lopez', 'reviewedAt' => '2026-08-28', 'room' => 'R202', 'status' => 'Rejected', 'note' => 'Not specified.'],
-        ['name' => 'Paolo Ramos', 'reviewedAt' => '2026-08-05', 'room' => 'R101', 'status' => 'Rejected', 'note' => 'Room was already occupied by the time of review.'],
-    ];
 @endphp
 
 <x-admin-layout>
@@ -120,6 +115,70 @@
                                     Reject
                                 </x-button>
                             </form>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
+
+    <section aria-labelledby="reviewed-applications-heading"
+        class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="reviewed-applications-heading"
+                class="font-display text-lg font-bold">
+                Recently Reviewed Applications
+            </h2>
+
+            <span class="rounded-full bg-paper2 px-3 py-1 text-xs font-semibold text-inkSoft">
+                {{ $reviewedApplications->count() }} reviewed
+            </span>
+        </div>
+
+        @if ($reviewedApplications->isEmpty())
+            <div class="flex min-h-28 items-center justify-center py-5 text-center">
+                <p class="text-sm text-inkSoft">
+                    No reviewed applications yet.
+                </p>
+            </div>
+        @else
+            <ul class="mt-4 flex flex-col gap-3">
+                @foreach ($reviewedApplications as $application)
+                    <li class="rounded-xl border border-paper2/80 p-4">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                                <h3 class="font-semibold">
+                                    {{ $application->applicant_name }}
+                                </h3>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    {{ $application->email }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    Preferred room:
+                                    {{ $application->preferredRoom?->room_number ?? 'No preference' }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    Reviewed:
+                                    {{ $application->reviewed_at ?? 'Date unavailable' }}
+                                </p>
+
+                                @if ($application->admin_remarks)
+                                    <p class="mt-2 text-sm text-inkSoft">
+                                        Remarks: {{ $application->admin_remarks }}
+                                    </p>
+                                @endif
+                            </div>
+
+                            <span class="rounded-full px-3 py-1 text-xs font-semibold
+                                {{ $application->status === 'approved'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800' }}">
+                                {{ ucfirst($application->status) }}
+                            </span>
                         </div>
                     </li>
                 @endforeach

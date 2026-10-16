@@ -3,7 +3,7 @@
 <x-admin-layout>
     <x-slot:title>Rooms &amp; Meters</x-slot:title>
 
-    <div class="mx-auto w-full max-w-[1440px] space-y-6 sm:space-y-8">
+    <div class="mx-auto w-full space-y-6 sm:space-y-8">
         <header class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div class="max-w-2xl">
                 <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-teal/15 bg-teal/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-teal">
