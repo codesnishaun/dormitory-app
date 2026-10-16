@@ -26,7 +26,7 @@ class TenantAccountSetupMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.tenant-account-setup',
+            view: 'email.tenant-account-setup',
         );
     }
 }
