@@ -26,36 +26,65 @@
 
     <section aria-labelledby="applications-heading" class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="applications-heading" class="font-display text-lg font-bold">Applications awaiting review</h2>
-            <span class="rounded-full bg-paper2 px-3 py-1 text-xs font-semibold text-inkSoft">0 pending</span>
+            <h2 id="applications-heading"
+                class="font-display text-lg font-bold">
+                Applications awaiting review
+            </h2>
+
+            <span class="rounded-full bg-paper2 px-3 py-1 text-xs font-semibold text-inkSoft">
+                {{ $pendingApplications->count() }} pending
+            </span>
         </div>
 
-        <div class="flex min-h-28 items-center justify-center py-5 text-center">
-            <p class="text-sm text-inkSoft">No pending applications right now.</p>
-        </div>
-
-        <div>
-            <h3 class="mb-3 font-display text-base font-bold">Recently reviewed</h3>
-            <ul class="flex flex-col gap-3">
-                @foreach ($reviewedApplications as $application)
+        @if ($pendingApplications->isEmpty())
+            <div class="flex min-h-28 items-center justify-center py-5 text-center">
+                <p class="text-sm text-inkSoft">
+                    No pending applications right now.
+                </p>
+            </div>
+        @else
+            <ul class="mt-4 flex flex-col gap-3">
+                @foreach ($pendingApplications as $application)
                     <li class="rounded-xl border border-paper2/80 p-4">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                                <h4 class="font-semibold">{{ $application['name'] }}</h4>
-                                <p class="mt-0.5 text-xs text-inkSoft">
-                                    <time datetime="{{ $application['reviewedAt'] }}">{{ $application['reviewedAt'] }}</time>
-                                    <span aria-hidden="true"> · </span>{{ $application['room'] }}
+                                <h3 class="font-semibold">
+                                    {{ $application->applicant_name }}
+                                </h3>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    {{ $application->email }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    Contact: {{ $application->phone }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    Preferred room:
+                                    {{ $application->preferredRoom?->room_number ?? 'No preference' }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-inkSoft">
+                                    Move-in date:
+                                    {{ $application->move_in_date }}
                                 </p>
                             </div>
-                            <span class="rounded-full bg-danger/10 px-2.5 py-1 text-[11px] font-semibold text-danger">
-                                {{ $application['status'] }}
+
+                            <span class="rounded-full bg-copper/10 px-2.5 py-1 text-xs font-semibold text-copperDeep">
+                                Pending review
                             </span>
                         </div>
-                        <p class="mt-2 text-sm text-inkSoft">{{ $application['note'] }}</p>
+
+                        @if ($application->message)
+                            <p class="mt-3 text-sm text-inkSoft">
+                                {{ $application->message }}
+                            </p>
+                        @endif
                     </li>
                 @endforeach
             </ul>
-        </div>
+        @endif
     </section>
 
     <section aria-labelledby="tenant-list-heading" class="rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
