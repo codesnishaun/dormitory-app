@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminControllers\RoomController;
 use App\Http\Controllers\AdminControllers\BillingController;
 use App\Http\Controllers\AdminControllers\AnnouncementController;
 use App\Http\Controllers\AdminControllers\MaintenanceController;
+use App\Http\Controllers\AdminControllers\ApplicationReviewController;  
 use App\Http\Controllers\TenantControllers\DashboardController as TenantDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,7 @@ Route::post('/application_form', [ApplicationController::class, 'store'])->name(
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
 
 Route::middleware(['auth', 'role:tenant'])->group(function () {
     Route::get('/tenant', [TenantDashboardController::class, 'index'])->name('tenant.dashboard');
@@ -36,6 +38,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
     Route::get('/admin/ask-dora', function() {return view('admin.ask-dora');})->name('admin.ask-dora');
+    Route::post('/admin/applications/{application}/approve', [ApplicationReviewController::class, 'approve',])->name('applications.approve');
+    Route::post('/admin/applications/{application}/reject', [ApplicationReviewController::class, 'reject', ])->name('applications.reject');
 });
 
 
