@@ -1,16 +1,3 @@
-@php
-    $tenants = [
-        ['name' => 'Marianne Santos', 'email' => 'marianne.santos@example.com', 'room' => 'R101', 'contact' => '0917 220 4481', 'moveIn' => '2025-11-02', 'balance' => '—'],
-        ['name' => 'Jomar Cruz', 'email' => 'jomar.cruz@example.com', 'room' => 'R102', 'contact' => '0928 771 0093', 'moveIn' => '2026-01-15', 'balance' => '₱450.00'],
-        ['name' => 'Angeline Reyes', 'email' => 'angeline.reyes@example.com', 'room' => 'R103', 'contact' => '0917 553 2210', 'moveIn' => '2025-06-10', 'balance' => '—'],
-        ['name' => 'Bea Villanueva', 'email' => 'bea.villanueva@example.com', 'room' => 'R103', 'contact' => '0995 402 8871', 'moveIn' => '2026-02-20', 'balance' => '—'],
-        ['name' => 'Carlo Mendoza', 'email' => 'carlo.mendoza@example.com', 'room' => 'R104', 'contact' => '0906 118 4432', 'moveIn' => '2025-09-01', 'balance' => '₱1,200.00'],
-        ['name' => 'Dianne Aquino', 'email' => 'dianne.aquino@example.com', 'room' => 'R201', 'contact' => '0917 004 7723', 'moveIn' => '2026-03-05', 'balance' => '—'],
-        ['name' => 'Ederick Bautista', 'email' => 'ederick.bautista@example.com', 'room' => 'R203', 'contact' => '0928 331 9905', 'moveIn' => '2025-12-12', 'balance' => '—'],
-    ];
-
-@endphp
-
 <x-admin-layout>
     <x-slot:title>Tenants - Admin - DORA</x-slot:title>
 
@@ -180,6 +167,27 @@
                                 {{ ucfirst($application->status) }}
                             </span>
                         </div>
+                         @if ($application->status === 'approved')
+                            <form action="{{ route('applications.assign-room', $application) }}"
+                                  method="POST"
+                                  class="mt-4 flex flex-wrap items-center gap-2">
+                                @csrf
+
+                                <select name="room_id" required
+                                        class="rounded-lg border border-paper2 bg-paper3 px-3 py-2 text-sm">
+                                    @foreach ($rooms as $room)
+                                        <option value="{{ $room->id }}"
+                                            @selected($room->id === $application->preferred_room_id)>
+                                            Room {{ $room->room_number }}
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                <x-button type="submit" variant="teal">
+                                    {{ $application->user_id ? 'Resend invitation' : 'Confirm room & send invitation' }}
+                                </x-button>
+                            </form>
+                        @endif
                     </li>
                 @endforeach
             </ul>
@@ -188,93 +196,123 @@
 
     <section aria-labelledby="tenant-list-heading" class="rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 id="tenant-list-heading" class="font-display text-lg font-bold">
-                All tenants <span class="text-inkSoft">({{ count($tenants) }})</span>
-            </h2>
-            <button
-                type="button"
-                class="inline-flex items-center justify-center gap-2 rounded-full bg-copper px-4 py-2 text-sm font-semibold text-white transition hover:bg-copperDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper"
-            >
-                <span aria-hidden="true">+</span>
-                Add tenant
-            </button>
+            <div>
+                <h2 id="tenant-list-heading" class="font-display text-lg font-bold">
+                    Tenant accounts <span class="text-inkSoft">({{ $tenants->total() }})</span>
+                </h2>
+                <p class="mt-1 text-sm text-inkSoft">Edit a tenant's name or email, or remove an unassigned account.</p>
+            </div>
         </div>
 
-        <div class="-mx-1 hidden overflow-x-auto px-1 md:block">
-            <table class="w-full min-w-[850px] border-collapse text-left">
-                <thead>
-                    <tr class="border-b border-paper2 text-[11px] font-semibold uppercase tracking-wider text-inkSoft">
-                        <th scope="col" class="px-3 py-3">Name</th>
-                        <th scope="col" class="px-3 py-3">Room</th>
-                        <th scope="col" class="px-3 py-3">Contact</th>
-                        <th scope="col" class="px-3 py-3">Move-in</th>
-                        <th scope="col" class="px-3 py-3">Balance</th>
-                        <th scope="col" class="px-3 py-3">Status</th>
-                        <th scope="col" class="px-3 py-3"><span class="sr-only">Actions</span></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-paper2/70 text-sm">
-                    @foreach ($tenants as $tenant)
-                        <tr>
-                            <th scope="row" class="px-3 py-3.5 font-normal">
-                                <span class="block font-semibold text-ink">{{ $tenant['name'] }}</span>
-                                <span class="mt-0.5 block text-xs text-inkSoft">{{ $tenant['email'] }}</span>
-                            </th>
-                            <td class="whitespace-nowrap px-3 py-3.5">{{ $tenant['room'] }}</td>
-                            <td class="px-3 py-3.5">{{ $tenant['contact'] }}</td>
-                            <td class="whitespace-nowrap px-3 py-3.5">{{ $tenant['moveIn'] }}</td>
-                            <td class="whitespace-nowrap px-3 py-3.5 font-mono text-xs">{{ $tenant['balance'] }}</td>
-                            <td class="px-3 py-3.5">
-                                <span class="rounded-full bg-success/15 px-2.5 py-1 text-[11px] font-semibold text-success">Active</span>
-                            </td>
-                            <td class="px-3 py-3.5">
-                                <div class="flex justify-end gap-2">
-                                    <button type="button" class="rounded-full border border-paper2 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">Edit</button>
-                                    <button type="button" class="rounded-full border border-danger/40 px-3.5 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">Remove</button>
-                                </div>
-                            </td>
+        @if ($tenants->isEmpty())
+            <div class="rounded-xl border border-dashed border-ink/15 bg-paper px-5 py-10 text-center">
+                <h3 class="font-semibold text-ink">No tenant accounts yet</h3>
+                <p class="mt-1 text-sm text-inkSoft">Approved applicants appear here after their room is confirmed.</p>
+            </div>
+        @else
+            <div class="-mx-1 hidden overflow-x-auto px-1 md:block">
+                <table class="w-full min-w-[760px] border-collapse text-left">
+                    <thead>
+                        <tr class="border-b border-paper2 text-[11px] font-semibold uppercase tracking-wider text-inkSoft">
+                            <th scope="col" class="px-3 py-3">Tenant</th>
+                            <th scope="col" class="px-3 py-3">Room</th>
+                            <th scope="col" class="px-3 py-3">Contact</th>
+                            <th scope="col" class="px-3 py-3">Move-in</th>
+                            <th scope="col" class="px-3 py-3">Assignment</th>
+                            <th scope="col" class="px-3 py-3"><span class="sr-only">Actions</span></th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody class="divide-y divide-paper2/70 text-sm">
+                        @foreach ($tenants as $tenant)
+                            @php($assignment = $tenant->roomAssignments->first())
+                            <tr>
+                                <th scope="row" class="px-3 py-3.5 font-normal">
+                                    <span class="block font-semibold text-ink">{{ $tenant->name }}</span>
+                                    <span class="mt-0.5 block text-xs text-inkSoft">{{ $tenant->email }}</span>
+                                </th>
+                                <td class="whitespace-nowrap px-3 py-3.5">{{ $assignment?->room?->room_number ?? 'Unassigned' }}</td>
+                                <td class="whitespace-nowrap px-3 py-3.5">{{ $assignment?->application?->phone ?? '—' }}</td>
+                                <td class="whitespace-nowrap px-3 py-3.5">{{ $assignment?->start_date?->format('M j, Y') ?? '—' }}</td>
+                                <td class="px-3 py-3.5">
+                                    @if ($assignment)
+                                        <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $assignment->status === 'occupied' ? 'bg-success/15 text-success' : 'bg-copper/10 text-copperDeep' }}">
+                                            {{ ucfirst($assignment->status) }}
+                                        </span>
+                                    @else
+                                        <span class="rounded-full bg-paper2 px-2.5 py-1 text-[11px] font-semibold text-inkSoft">No room assigned</span>
+                                    @endif
+                                </td>
+                                <td class="px-3 py-3.5">
+                                    <div class="flex justify-end gap-2">
+                                        <button type="button" data-tenant-edit data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}" data-tenant-email="{{ $tenant->email }}"
+                                            class="rounded-full border border-paper2 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                                            Edit
+                                        </button>
+                                        <button type="button" data-tenant-delete data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
+                                            class="rounded-full border border-danger/40 px-3.5 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-        <ul class="flex flex-col gap-3 md:hidden">
-            @foreach ($tenants as $tenant)
-                <li class="rounded-xl border border-paper2/80 p-4">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <h3 class="font-semibold">{{ $tenant['name'] }}</h3>
-                            <p class="mt-0.5 break-all text-xs text-inkSoft">{{ $tenant['email'] }}</p>
+            <ul class="flex flex-col gap-3 md:hidden">
+                @foreach ($tenants as $tenant)
+                    @php($assignment = $tenant->roomAssignments->first())
+                    <li class="rounded-xl border border-paper2/80 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h3 class="font-semibold">{{ $tenant->name }}</h3>
+                                <p class="mt-0.5 break-all text-xs text-inkSoft">{{ $tenant->email }}</p>
+                            </div>
+                            @if ($assignment)
+                                <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $assignment->status === 'occupied' ? 'bg-success/15 text-success' : 'bg-copper/10 text-copperDeep' }}">
+                                    {{ ucfirst($assignment->status) }}
+                                </span>
+                            @else
+                                <span class="shrink-0 rounded-full bg-paper2 px-2.5 py-1 text-[11px] font-semibold text-inkSoft">Unassigned</span>
+                            @endif
                         </div>
-                        <span class="shrink-0 rounded-full bg-success/15 px-2.5 py-1 text-[11px] font-semibold text-success">Active</span>
-                    </div>
 
-                    <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                        <div>
-                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Room</dt>
-                            <dd class="mt-0.5">{{ $tenant['room'] }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Contact</dt>
-                            <dd class="mt-0.5">{{ $tenant['contact'] }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Move-in</dt>
-                            <dd class="mt-0.5">{{ $tenant['moveIn'] }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Balance</dt>
-                            <dd class="mt-0.5 font-mono text-xs">{{ $tenant['balance'] }}</dd>
-                        </div>
-                    </dl>
+                        <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                            <div>
+                                <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Room</dt>
+                                <dd class="mt-0.5">{{ $assignment?->room?->room_number ?? 'Unassigned' }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Contact</dt>
+                                <dd class="mt-0.5">{{ $assignment?->application?->phone ?? '—' }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold uppercase tracking-wider text-inkSoft">Move-in</dt>
+                                <dd class="mt-0.5">{{ $assignment?->start_date?->format('M j, Y') ?? '—' }}</dd>
+                            </div>
+                        </dl>
 
-                    <div class="mt-4 flex gap-2 border-t border-paper2/70 pt-3">
-                        <button type="button" class="flex-1 rounded-full border border-paper2 px-3 py-2 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">Edit</button>
-                        <button type="button" class="flex-1 rounded-full border border-danger/40 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">Remove</button>
-                    </div>
-                </li>
-            @endforeach
-        </ul>
+                        <div class="mt-4 flex gap-2 border-t border-paper2/70 pt-3">
+                            <button type="button" data-tenant-edit data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}" data-tenant-email="{{ $tenant->email }}"
+                                class="flex-1 rounded-full border border-paper2 px-3 py-2 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                                Edit
+                            </button>
+                            <button type="button" data-tenant-delete data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
+                                class="flex-1 rounded-full border border-danger/40 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
+                                Delete
+                            </button>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="mt-5">
+                {{ $tenants->links() }}
+            </div>
+        @endif
     </section>
+
+    @include('admin.tenant.edit')
+    @include('admin.tenant.delete')
 </x-admin-layout>
