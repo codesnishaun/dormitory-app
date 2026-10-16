@@ -23,7 +23,25 @@
         title="Tenants"
         description="Manage resident profiles and room assignments."
     />
+    @if (session('success'))
+        <div class="mb-4 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+            {{ session('success') }}
+        </div>
+    @endif
 
+    @if (session('error'))
+        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            @foreach ($errors->all() as $error)
+                <p>{{ $error }}</p>
+            @endforeach
+        </div>
+    @endif
     <section aria-labelledby="applications-heading" class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 id="applications-heading"
