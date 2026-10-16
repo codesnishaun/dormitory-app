@@ -81,6 +81,28 @@
                                 {{ $application->message }}
                             </p>
                         @endif
+                        
+                            <div class="mt-4 flex flex-wrap gap-2">
+                            <form action="{{ route('applications.approve', $application) }}" method="POST">
+                                @csrf
+                                <x-button
+                                    type="submit"
+                                    variant="teal"
+                                >
+                                    Approve
+                                </x-button>
+                            </form>
+
+                            <form action="{{ route('applications.reject', $application) }}"  method="POST">
+                                @csrf
+                                <x-button
+                                    type="submit"
+                                    variant="danger"
+                                >
+                                    Reject
+                                </x-button>
+                            </form>
+                        </div>
                     </li>
                 @endforeach
             </ul>
