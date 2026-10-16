@@ -4,44 +4,41 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Room;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class RoomController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $savedRooms = Room::orderBy('id')->get()
-            ->map(fn (Room $room) => [
-                'number'    => $room->room_number,
-                'floor'     => 'Floor ' . $room->floor_number,
-                'type'      => $room->capacity > 1 ? 'Shared' : 'Single',
-                'rent'      => (float) $room->monthly_rent,
-                'tenants'   => [],
-                'occupancy' => $room->status === 'available' ? 'Vacant' : '0/' . $room->capacity . ' occupied',
-                'status'    => match ($room->status) {
-                    'available'   => 'vacant',
-                    'reading_due' => 'reading_due',
-                    default       => 'occupied',
-                },
-                'current' => 0, 'previous' => 0, 'usage' => 0,
-                'percent' => 0, 'rate' => 12, 'updated' => '—',
-            ])
-            ->all();
+        $rooms = Room::query()
+            ->orderBy('room_number')
+            ->get();
 
-        return view('admin.room.index', compact('savedRooms'));
+        $occupiedRooms = $rooms->where('status', 'occupied')->count();
+        $availableRooms = $rooms->where('status', 'available')->count();
+        $reservedRooms = $rooms->where('status', 'reserved')->count();
+
+        return view('admin.room.index', compact(
+            'rooms',
+            'occupiedRooms',
+            'availableRooms',
+            'reservedRooms',
+        ));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'room_number'     => ['required', 'string', 'max:20', 'unique:rooms,room_number'],
-            'floor_number'    => ['required', 'integer', 'min:1', 'max:50'],
             'capacity'        => ['required', 'integer', 'min:1', 'max:10'],
             'monthly_rent'    => ['required', 'numeric', 'min:0'],
             'submeter_number' => ['nullable', 'string', 'max:50', 'unique:rooms,submeter_number'],
         ]);
 
-        Room::create($data); 
+        // New rooms start as "available"
+        Room::create($data + ['status' => 'available']);
 
         return redirect()->route('admin.room.index')->with('success', 'Room added.');
     }
