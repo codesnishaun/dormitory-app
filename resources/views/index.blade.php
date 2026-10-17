@@ -33,15 +33,15 @@
 
                 <dl class="mt-10 grid max-w-md grid-cols-3 divide-x divide-paper/15 border-y border-paper/15 py-4">
                     <div class="pr-4">
-                        <dt class="font-display text-2xl font-semibold text-paper sm:text-3xl">8</dt>
+                        <dt class="font-display text-2xl font-semibold text-paper sm:text-3xl">{{ $totalRooms }}</dt>
                         <dd class="mt-1 text-[10px] font-medium uppercase tracking-[0.13em] text-paper/50 sm:text-xs">Rooms</dd>
                     </div>
                     <div class="px-4">
-                        <dt class="font-display text-2xl font-semibold text-paper sm:text-3xl">7</dt>
+                        <dt class="font-display text-2xl font-semibold text-paper sm:text-3xl">{{ $tenantCount }}</dt>
                         <dd class="mt-1 text-[10px] font-medium uppercase tracking-[0.13em] text-paper/50 sm:text-xs">Tenants</dd>
                     </div>
                     <div class="pl-4">
-                        <dt class="font-display text-2xl font-semibold text-copper sm:text-3xl">2</dt>
+                        <dt class="font-display text-2xl font-semibold text-copper sm:text-3xl">{{ $openRooms }}</dt>
                         <dd class="mt-1 text-[10px] font-medium uppercase tracking-[0.13em] text-paper/50 sm:text-xs">Open rooms</dd>
                     </div>
                 </dl>
