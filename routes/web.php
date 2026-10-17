@@ -1,16 +1,8 @@
 <?php
 
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminControllers\DashboardController as AdminDashboardController;
-use App\Http\Controllers\AdminControllers\TenantController;
-use App\Http\Controllers\AdminControllers\RoomController;
-use App\Http\Controllers\AdminControllers\BillingController;
-use App\Http\Controllers\AdminControllers\AnnouncementController;
-use App\Http\Controllers\AdminControllers\MaintenanceController;
-use App\Http\Controllers\AdminControllers\ApplicationReviewController;  
-use App\Http\Controllers\TenantControllers\DashboardController as TenantDashboardController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -19,31 +11,3 @@ Route::post('/application_form', [ApplicationController::class, 'store'])->name(
 Route::get('/login', [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'store'])->name('login.store');
 Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
-
-
-Route::middleware(['auth', 'role:tenant'])->group(function () {
-    Route::get('/tenant', [TenantDashboardController::class, 'index'])->name('tenant.dashboard');
-    Route::get('/tenant/room-bill',function () {return view('tenant.room-bill');})->name('tenant.room-bill');
-    Route::get('/tenant/announcements',function () {return view('tenant.announcements');})->name('tenant.announcements');
-    Route::get('/tenant/maintenance', function() {return view('tenant.maintenance');})->name('tenant.maintenance');
-    Route::get('/tenant/ask-dora', function() {return view('tenant.ask-dora');})->name('tenant.ask-dora');
-});
-
-
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/tenants', [TenantController::class, 'index'])->name('admin.tenant.index');
-    Route::get('/admin/rooms', [RoomController::class, 'index'])->name('admin.room.index');
-    Route::post('/admin/rooms', [RoomController::class, 'store'])->name('admin.room.store');
-    Route::put('/admin/rooms/{room}', [RoomController::class, 'update'])->name('admin.room.update');
-    Route::delete('/admin/rooms/{room}', [RoomController::class, 'destroy'])->name('admin.room.destroy');
-    Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
-    Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
-    Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
-    Route::get('/admin/ask-dora', function() {return view('admin.ask-dora');})->name('admin.ask-dora');
-    Route::post('/admin/applications/{application}/approve', [ApplicationReviewController::class, 'approve',])->name('applications.approve');
-    Route::post('/admin/applications/{application}/reject', [ApplicationReviewController::class, 'reject', ])->name('applications.reject');
-});
-
-
-
