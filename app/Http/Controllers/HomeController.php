@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Room;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -11,7 +13,11 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('index');
+        $totalRooms = Room::count();
+        $openRooms = Room::where('status', 'available')->count();
+        $tenantCount = User::where('role', 'tenant')->count();
+
+        return view('index', compact('totalRooms', 'openRooms', 'tenantCount'));
     }
 
     /**
