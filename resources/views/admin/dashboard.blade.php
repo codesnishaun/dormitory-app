@@ -11,7 +11,7 @@
     <section aria-label="Dormitory overview" class="mb-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ([
             ['label' => 'Occupied rooms', 'value' => $occupiedRooms . '/' . $totalRooms, 'note' => $vacantRooms . ' vacant', 'noteClass' => 'text-success'],
-            ['label' => 'Active tenants', 'value' => '7', 'note' => 'Across 6 rooms', 'noteClass' => 'text-success'],
+            ['label' => 'Active tenants', 'value' => $tenantCount, 'note' => 'Registered tenant accounts', 'noteClass' => 'text-success'],
             ['label' => 'Pending maintenance', 'value' => '2', 'note' => 'Needs attention', 'noteClass' => 'text-danger'],
             ['label' => 'This cycle usage', 'value' => '267 kWh', 'note' => '₱3,204.00 total', 'noteClass' => 'text-success'],
         ] as $metric)
