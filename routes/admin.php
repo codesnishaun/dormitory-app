@@ -21,6 +21,10 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::delete('/admin/rooms/{room}', [RoomController::class, 'destroy'])->name('admin.room.destroy');
     Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
     Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
+    Route::post('/admin/announcements', [AnnouncementController::class, 'store'])->name('admin.announcement.store');
+    Route::put('/admin/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('admin.announcement.update');
+    Route::patch('/admin/announcements/{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('admin.announcement.pin');
+    Route::delete('/admin/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
     Route::get('/admin/ask-dora', function () {
         return view('admin.ask-dora');
