@@ -21,6 +21,8 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::put('/admin/rooms/{room}', [RoomController::class, 'update'])->name('admin.room.update');
     Route::delete('/admin/rooms/{room}', [RoomController::class, 'destroy'])->name('admin.room.destroy');
     Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
+    Route::post('/admin/billing/tenants/{tenant}/payments', [BillingController::class, 'storePayment'])->name('admin.billing.payments.store');
+    Route::post('/admin/billing/tenants/{tenant}/charges', [BillingController::class, 'storeCharge'])->name('admin.billing.charges.store');
     Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
     Route::post('/admin/announcements', [AnnouncementController::class, 'store'])->name('admin.announcement.store');
     Route::put('/admin/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('admin.announcement.update');
@@ -34,4 +36,5 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::post('/admin/applications/{application}/reject', [ApplicationReviewController::class, 'reject'])->name('applications.reject');
     Route::delete('/admin/applications/{application}', [ApplicationReviewController::class, 'destroy'])->name('applications.destroy');
     Route::post('/applications/{application}/assign-room', [RoomAssignmentController::class, 'store'])->name('applications.assign-room');
+   
 });
