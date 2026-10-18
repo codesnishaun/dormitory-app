@@ -40,7 +40,10 @@ class TenantController extends Controller
 
         $reviewedApplications = Application::query()
             ->whereIn('status', ['approved', 'rejected'])
-            ->with('preferredRoom')
+            ->with([
+                'preferredRoom',
+                'user.tenantAccountInvitations' => fn ($query) => $query->whereNotNull('used_at'),
+            ])
             ->orderByDesc('reviewed_at')
             ->take(5)
             ->get();
