@@ -1,11 +1,13 @@
 <?php
 
+use App\Mail\TenantAccountSetupMail;
 use App\Models\Application;
 use App\Models\Room;
 use App\Models\RoomAssignment;
 use App\Models\TenantAccountInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 
 uses(RefreshDatabase::class);
 
@@ -48,7 +50,92 @@ test('admin tenant index shows tenant records and their room assignment from the
         ->assertSee('data-tenant-edit', false)
         ->assertSee('data-tenant-delete', false)
         ->assertSee('Delete tenant?')
-        ->assertSee('name="_method" value="DELETE"', false);
+        ->assertSee('name="_method" value="DELETE"', false)
+        ->assertSee('Add a tenant')
+        ->assertSee('action="'.route('admin.tenant.store').'"', false)
+        ->assertSee('add-tenant-modal', false);
+});
+
+test('admin can add a tenant account and send its setup invitation', function () {
+    Mail::fake();
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->post(route('admin.tenant.store'), [
+            'name' => 'Taylor Guest',
+            'email' => 'taylor@example.test',
+        ])
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('success', 'Tenant account added and setup invitation sent.');
+
+    $tenant = User::query()->where('email', 'taylor@example.test')->firstOrFail();
+
+    $this->assertDatabaseHas('users', [
+        'id' => $tenant->id,
+        'name' => 'Taylor Guest',
+        'email' => 'taylor@example.test',
+        'role' => 'tenant',
+    ]);
+    $this->assertDatabaseHas('tenant_account_invitations', [
+        'user_id' => $tenant->id,
+        'issued_by' => $admin->id,
+    ]);
+    Mail::assertSent(TenantAccountSetupMail::class);
+});
+
+test('admin cannot add a tenant with an email that already belongs to an account', function () {
+    Mail::fake();
+    $admin = User::factory()->create(['role' => 'admin']);
+    $existingTenant = User::factory()->create([
+        'role' => 'tenant',
+        'email' => 'existing@example.test',
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.tenant.store'), [
+            'name' => 'Guest Applicant',
+            'email' => $existingTenant->email,
+        ])
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHasErrorsIn('addTenant', [
+            'email' => 'An account with this email already exists. Enter a different email.',
+        ]);
+
+    $this->assertDatabaseCount('users', 2);
+    $this->assertDatabaseCount('tenant_account_invitations', 0);
+    Mail::assertNotSent(TenantAccountSetupMail::class);
+
+    $this->get(route('admin.tenant.index'))
+        ->assertSee('add-tenant-modal', false)
+        ->assertSee('showModal()', false)
+        ->assertSee('An account with this email already exists. Enter a different email.')
+        ->assertSee('existing@example.test');
+});
+
+test('tenant account creation requires a name and email', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->post(route('admin.tenant.store'), [])
+        ->assertSessionHasErrorsIn('addTenant', [
+            'name' => 'The name field is required.',
+            'email' => 'The email field is required.',
+        ]);
+
+    $this->assertDatabaseCount('users', 1);
+});
+
+test('tenant account creation rejects an invalid email address', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->post(route('admin.tenant.store'), [
+            'name' => 'Taylor Guest',
+            'email' => 'not-an-email',
+        ])
+        ->assertSessionHasErrorsIn('addTenant', ['email' => 'The email field must be a valid email address.']);
+
+    $this->assertDatabaseCount('users', 1);
 });
 
 test('admin can update a tenant name and email', function () {
@@ -183,8 +270,15 @@ test('guest is redirected when accessing tenant administration', function () {
         'email' => 'changed@example.test',
     ])->assertRedirectToRoute('login');
 
+    $this->post(route('admin.tenant.store'), [
+        'name' => 'Guest Applicant',
+        'email' => 'guest@example.test',
+    ])->assertRedirectToRoute('login');
+
     $this->delete(route('admin.tenant.destroy', $tenant))
         ->assertRedirectToRoute('login');
+
+    $this->assertDatabaseMissing('users', ['email' => 'guest@example.test']);
 });
 
 test('tenant cannot access tenant administration actions', function () {
@@ -201,6 +295,11 @@ test('tenant cannot access tenant administration actions', function () {
         'email' => 'changed@example.test',
     ])->assertForbidden();
 
+    $this->post(route('admin.tenant.store'), [
+        'name' => 'Guest Applicant',
+        'email' => 'guest@example.test',
+    ])->assertForbidden();
+
     $this->delete(route('admin.tenant.destroy', $otherTenant))
         ->assertForbidden();
 
@@ -208,6 +307,7 @@ test('tenant cannot access tenant administration actions', function () {
         'id' => $otherTenant->id,
         'role' => 'tenant',
     ]);
+    $this->assertDatabaseMissing('users', ['email' => 'guest@example.test']);
 });
 
 test('admin tenant actions cannot edit or delete an administrator account', function () {
