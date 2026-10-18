@@ -16,6 +16,23 @@ use Throwable;
 
 class TenantInvitationService
 {
+    public function createTenantAndInvite(string $name, string $email, User $admin): bool
+    {
+        [$invitation, $token] = DB::transaction(function () use ($name, $email, $admin) {
+            $tenant = new User;
+            $tenant->forceFill([
+                'name' => $name,
+                'email' => $email,
+                'role' => 'tenant',
+                'password' => Str::random(64),
+            ])->save();
+
+            return $this->issueInvitation($tenant, $admin);
+        });
+
+        return $this->sendInvitation($invitation, $token);
+    }
+
     /**
      * Confirm a room assignment and email the setup link.
      * Safe to call again for the same application: it never creates a second

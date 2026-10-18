@@ -160,30 +160,49 @@
                                 @endif
                             </div>
 
-                            <span class="rounded-full px-3 py-1 text-xs font-semibold
-                                {{ $application->status === 'approved'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800' }}">
-                                {{ ucfirst($application->status) }}
-                            </span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="rounded-full px-3 py-1 text-xs font-semibold
+                                    {{ $application->status === 'approved'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800' }}">
+                                    {{ ucfirst($application->status) }}
+                                </span>
+
+                                @if ($application->status === 'approved' && ($application->user?->tenantAccountInvitations->isNotEmpty() ?? false))
+                                    <form
+                                        action="{{ route('applications.destroy', $application) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Remove this reviewed application? This action cannot be undone.')">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <x-button type="submit" variant="danger" size="sm">
+                                            Remove
+                                        </x-button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                          @if ($application->status === 'approved')
                             <form action="{{ route('applications.assign-room', $application) }}"
                                   method="POST"
-                                  class="mt-4 flex flex-wrap items-center gap-2">
+                                  class="mt-4 flex flex-wrap items-end gap-2">
                                 @csrf
 
-                                <select name="room_id" required
-                                        class="rounded-lg border border-paper2 bg-paper3 px-3 py-2 text-sm">
-                                    @foreach ($rooms as $room)
-                                        <option value="{{ $room->id }}"
-                                            @selected($room->id === $application->preferred_room_id)>
-                                            Room {{ $room->room_number }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                <x-button type="submit" variant="teal">
+                                <div>
+                                    <x-form-input
+                                        name="room_id"
+                                        label="Available Rooms"
+                                        type="select"
+                                        :value="$application->preferred_room_id"
+                                        :options="$rooms->mapWithKeys(fn ($room) => [
+                                            $room->id => 'Room ' . $room->room_number
+                                        ])->all()"
+                                        required
+                                    />
+                                </div>
+                                
+                                <x-button type="submit" variant="teal" class="!px-3.5 !py-2.5 text-[14.5px]!" >
                                     {{ $application->user_id ? 'Resend invitation' : 'Confirm room & send invitation' }}
                                 </x-button>
                             </form>
@@ -202,6 +221,11 @@
                 </h2>
                 <p class="mt-1 text-sm text-inkSoft">Edit a tenant's name or email, or remove an unassigned account.</p>
             </div>
+            <button type="button" data-tenant-create
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-tealDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                <span aria-hidden="true" class="text-lg leading-none">+</span>
+                Add tenant
+            </button>
         </div>
 
         @if ($tenants->isEmpty())
@@ -313,6 +337,7 @@
         @endif
     </section>
 
+    @include('admin.tenant.create')
     @include('admin.tenant.edit')
     @include('admin.tenant.delete')
 </x-admin-layout>

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/tenants', [TenantController::class, 'index'])->name('admin.tenant.index');
+    Route::post('/admin/tenants', [TenantController::class, 'store'])->name('admin.tenant.store');
     Route::put('/admin/tenants/{tenant}', [TenantController::class, 'update'])->name('admin.tenant.update');
     Route::delete('/admin/tenants/{tenant}', [TenantController::class, 'destroy'])->name('admin.tenant.destroy');
     Route::get('/admin/rooms', [RoomController::class, 'index'])->name('admin.room.index');
@@ -31,5 +32,6 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     })->name('admin.ask-dora');
     Route::post('/admin/applications/{application}/approve', [ApplicationReviewController::class, 'approve'])->name('applications.approve');
     Route::post('/admin/applications/{application}/reject', [ApplicationReviewController::class, 'reject'])->name('applications.reject');
+    Route::delete('/admin/applications/{application}', [ApplicationReviewController::class, 'destroy'])->name('applications.destroy');
     Route::post('/applications/{application}/assign-room', [RoomAssignmentController::class, 'store'])->name('applications.assign-room');
 });

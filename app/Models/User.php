@@ -23,6 +23,11 @@ class User extends Authenticatable
         return $this->hasMany(RoomAssignment::class);
     }
 
+    public function tenantAccountInvitations(): HasMany
+    {
+        return $this->hasMany(TenantAccountInvitation::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
