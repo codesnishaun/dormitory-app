@@ -160,12 +160,28 @@
                                 @endif
                             </div>
 
-                            <span class="rounded-full px-3 py-1 text-xs font-semibold
-                                {{ $application->status === 'approved'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-red-100 text-red-800' }}">
-                                {{ ucfirst($application->status) }}
-                            </span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="rounded-full px-3 py-1 text-xs font-semibold
+                                    {{ $application->status === 'approved'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800' }}">
+                                    {{ ucfirst($application->status) }}
+                                </span>
+
+                                @if ($application->status === 'approved' && ($application->user?->tenantAccountInvitations->isNotEmpty() ?? false))
+                                    <form
+                                        action="{{ route('applications.destroy', $application) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Remove this reviewed application? This action cannot be undone.')">
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <x-button type="submit" variant="danger" size="sm">
+                                            Remove
+                                        </x-button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                          @if ($application->status === 'approved')
                             <form action="{{ route('applications.assign-room', $application) }}"
