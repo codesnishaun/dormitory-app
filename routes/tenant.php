@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TenantAccountSetupController;
+use App\Http\Controllers\TenantControllers\AnnouncementController as TenantAnnouncementController;
 use App\Http\Controllers\TenantControllers\DashboardController as TenantDashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,9 +15,7 @@ Route::middleware(['auth', 'role:tenant'])->group(function (): void {
     Route::get('/tenant/room-bill', function () {
         return view('tenant.room-bill');
     })->name('tenant.room-bill');
-    Route::get('/tenant/announcements', function () {
-        return view('tenant.announcements');
-    })->name('tenant.announcements');
+    Route::get('/tenant/announcements', [TenantAnnouncementController::class, 'index'])->name('tenant.announcements');
     Route::get('/tenant/maintenance', function () {
         return view('tenant.maintenance');
     })->name('tenant.maintenance');
