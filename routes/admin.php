@@ -32,5 +32,6 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     })->name('admin.ask-dora');
     Route::post('/admin/applications/{application}/approve', [ApplicationReviewController::class, 'approve'])->name('applications.approve');
     Route::post('/admin/applications/{application}/reject', [ApplicationReviewController::class, 'reject'])->name('applications.reject');
+    Route::delete('/admin/applications/{application}', [ApplicationReviewController::class, 'destroy'])->name('applications.destroy');
     Route::post('/applications/{application}/assign-room', [RoomAssignmentController::class, 'store'])->name('applications.assign-room');
 });
