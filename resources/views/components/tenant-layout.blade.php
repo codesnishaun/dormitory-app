@@ -38,6 +38,12 @@
                     :href="route('tenant.maintenance')"
                     :active="request()->routeIs('tenant.maintenance')"
                 ><x-svg-icon name="maintenance" />Maintenance</x-button>
+                
+                <x-button
+                    variant="sidebar"
+                    :href="route('tenant.absence-request')"
+                    :active="request()->routeIs('tenant.absence-request')"
+                ><x-svg-icon name="tenants" />Absence requests</x-button>
 
                 <x-button
                     variant="sidebar"
