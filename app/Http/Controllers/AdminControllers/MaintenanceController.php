@@ -3,63 +3,70 @@
 namespace App\Http\Controllers\AdminControllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Contracts\View\View;
+use App\Models\MaintenanceRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class MaintenanceController extends Controller
 {
+    private const PRIORITY_CLASSES = [
+        'High' => 'bg-danger/10 text-danger',
+        'Medium' => 'bg-copper/15 text-copperDeep',
+        'Low' => 'bg-paper2 text-inkSoft',
+    ];
+
     public function index(): View
     {
-        $maintenanceRequests = [
-            [
-                'id' => 'MR-1048',
-                'title' => 'Aircon not cooling',
-                'category' => 'Appliance',
-                'priority' => 'High',
-                'priority_class' => 'bg-danger/10 text-danger',
-                'room' => 'R201',
-                'tenant' => 'Dianne Aquino',
-                'reported_at' => '2026-08-27',
-                'reported_at_label' => 'Aug 27, 2026',
-                'description' => 'The unit turns on, but the airflow is weak and not cold. It may need a refrigerant refill or cleaning.',
-                'status' => 'Pending',
-            ],
-            [
-                'id' => 'MR-1047',
-                'title' => 'Leaking faucet in shared bathroom',
-                'category' => 'Plumbing',
-                'priority' => 'Medium',
-                'priority_class' => 'bg-copper/15 text-copperDeep',
-                'room' => 'R104',
-                'tenant' => 'Carlo Mendoza',
-                'reported_at' => '2026-08-25',
-                'reported_at_label' => 'Aug 25, 2026',
-                'description' => 'Water keeps dripping from the sink faucet even when fully closed. The leak has gotten worse over the past 3 days.',
-                'status' => 'In Progress',
-            ],
-            [
-                'id' => 'MR-1032',
-                'title' => 'Loose door hinge',
-                'category' => 'Carpentry',
-                'priority' => 'Low',
-                'priority_class' => 'bg-paper2 text-inkSoft',
-                'room' => 'R103',
-                'tenant' => 'Angeline Reyes',
-                'reported_at' => '2026-08-10',
-                'reported_at_label' => 'Aug 10, 2026',
-                'description' => 'The room door sags and scrapes the floor when opening.',
-                'status' => 'Resolved',
-            ],
-        ];
+        $requests = MaintenanceRequest::with(['user', 'roomAssignment.room'])
+            ->latest()
+            ->get();
 
-        $statuses = ['Pending', 'In Progress', 'Resolved'];
-        $priorities = ['High', 'Medium', 'Low'];
+        $maintenanceRequests = $requests->map(fn (MaintenanceRequest $item): array => [
+            'db_id' => $item->id,
+            'id' => $item->reference,
+            'title' => $item->title,
+            'category' => $item->category,
+            'priority' => $item->priority,
+            'priority_class' => self::PRIORITY_CLASSES[$item->priority] ?? 'bg-paper2 text-inkSoft',
+            'room' => $item->roomAssignment?->room?->room_number ?? 'N/A',
+            'tenant' => $item->user?->name ?? 'Unknown',
+            'reported_at' => $item->created_at->toDateString(),
+            'reported_at_label' => $item->created_at->format('M j, Y'),
+            'description' => $item->description,
+            'status' => $item->status,
+            'admin_remarks' => $item->admin_remarks,
+        ])->all();
+
+        $statuses = MaintenanceRequest::STATUSES;
+        $priorities = MaintenanceRequest::PRIORITIES;
         $summary = [
-            'total' => count($maintenanceRequests),
-            'pending' => count(array_filter($maintenanceRequests, fn (array $request): bool => $request['status'] === 'Pending')),
-            'in_progress' => count(array_filter($maintenanceRequests, fn (array $request): bool => $request['status'] === 'In Progress')),
-            'resolved' => count(array_filter($maintenanceRequests, fn (array $request): bool => $request['status'] === 'Resolved')),
+            'total' => $requests->count(),
+            'pending' => $requests->where('status', 'Pending')->count(),
+            'in_progress' => $requests->where('status', 'In Progress')->count(),
+            'resolved' => $requests->where('status', 'Resolved')->count(),
         ];
 
         return view('admin.maintenance.index', compact('maintenanceRequests', 'priorities', 'statuses', 'summary'));
+    }
+
+    public function update(Request $request, MaintenanceRequest $maintenanceRequest): RedirectResponse
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(MaintenanceRequest::STATUSES)],
+            'admin_remarks' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $maintenanceRequest->update([
+            'status' => $data['status'],
+            'admin_remarks' => $data['admin_remarks'] ?? null,
+            'resolved_at' => $data['status'] === 'Resolved'
+                ? ($maintenanceRequest->resolved_at ?? now())
+                : null,
+        ]);
+
+        return redirect()->route('admin.maintenance.index')
+            ->with('success', $maintenanceRequest->reference . ' updated.');
     }
 }

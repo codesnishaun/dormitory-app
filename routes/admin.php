@@ -27,6 +27,7 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::patch('/admin/announcements/{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('admin.announcement.pin');
     Route::delete('/admin/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
+    Route::patch('/admin/maintenance/{maintenanceRequest}', [MaintenanceController::class, 'update'])->name('admin.maintenance.update');
     Route::get('/admin/ask-dora', function () {
         return view('admin.ask-dora');
     })->name('admin.ask-dora');
