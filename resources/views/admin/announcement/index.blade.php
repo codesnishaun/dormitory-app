@@ -253,7 +253,7 @@
                                 </span>
                             </li>
                         @empty
-                            <li class="px-4 py-6 text-center text-sm text-inkSoft sm:px-5">Walang naka-schedule.</li>
+                            <li class="px-4 py-6 text-center text-sm text-inkSoft sm:px-5">Nothing scheduled.</li>
                         @endforelse
                     </ul>
                 </section>
@@ -349,10 +349,10 @@
                         </div>
                     </article>
                 @empty
-                    <p class="py-6 text-center text-sm text-inkSoft">Wala pang published announcement.</p>
+                    <p class="py-6 text-center text-sm text-inkSoft">No published announcements yet.</p>
                 @endforelse
 
-                <p id="no_match" class="hidden py-6 text-center text-sm text-inkSoft">Walang tumugma sa search o filter.</p>
+                <p id="no_match" class="hidden py-6 text-center text-sm text-inkSoft">No announcements match your search or filter.</p>
             </div>
 
             <div class="flex flex-col gap-1 border-t border-ink/8 bg-paper/35 px-4 py-3 text-xs text-inkSoft sm:flex-row sm:items-center sm:justify-between sm:px-6">

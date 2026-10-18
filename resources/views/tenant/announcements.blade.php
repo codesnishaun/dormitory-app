@@ -19,7 +19,7 @@
                     <div class="mt-1 whitespace-pre-line font-sans text-sm leading-relaxed text-inkSoft">{{ $announcement->body }}</div>
                 </div>
             @empty
-                <p class="py-6 text-center text-sm text-inkSoft">Wala pang announcement.</p>
+                <p class="py-6 text-center text-sm text-inkSoft">No announcements available.</p>
             @endforelse
         </div>
     </x-tenant-panel>
