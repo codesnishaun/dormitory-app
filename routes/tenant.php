@@ -3,6 +3,7 @@
 use App\Http\Controllers\TenantAccountSetupController;
 use App\Http\Controllers\TenantControllers\AnnouncementController as TenantAnnouncementController;
 use App\Http\Controllers\TenantControllers\DashboardController as TenantDashboardController;
+use App\Http\Controllers\TenantControllers\MaintenanceController as TenantMaintenanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:10,1')->group(function (): void {
@@ -16,9 +17,8 @@ Route::middleware(['auth', 'role:tenant'])->group(function (): void {
         return view('tenant.room-bill');
     })->name('tenant.room-bill');
     Route::get('/tenant/announcements', [TenantAnnouncementController::class, 'index'])->name('tenant.announcements');
-    Route::get('/tenant/maintenance', function () {
-        return view('tenant.maintenance');
-    })->name('tenant.maintenance');
+    Route::get('/tenant/maintenance', [TenantMaintenanceController::class, 'index'])->name('tenant.maintenance');
+    Route::post('/tenant/maintenance', [TenantMaintenanceController::class, 'store'])->name('tenant.maintenance.store');
     Route::get('/tenant/ask-dora', function () {
         return view('tenant.ask-dora');
     })->name('tenant.ask-dora');
