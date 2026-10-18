@@ -202,6 +202,11 @@
                 </h2>
                 <p class="mt-1 text-sm text-inkSoft">Edit a tenant's name or email, or remove an unassigned account.</p>
             </div>
+            <button type="button" data-tenant-create
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-tealDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                <span aria-hidden="true" class="text-lg leading-none">+</span>
+                Add tenant
+            </button>
         </div>
 
         @if ($tenants->isEmpty())
@@ -313,6 +318,7 @@
         @endif
     </section>
 
+    @include('admin.tenant.create')
     @include('admin.tenant.edit')
     @include('admin.tenant.delete')
 </x-admin-layout>
