@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\RoomAssignment;
 use App\Models\TenantAccountInvitation;
 use App\Models\User;
+use App\Services\TenantInvitationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -47,6 +48,31 @@ class TenantController extends Controller
         $rooms = Room::orderBy('room_number')->get();
 
         return view('admin.tenant.index', compact('tenants', 'pendingApplications', 'reviewedApplications', 'rooms'));
+    }
+
+    public function store(Request $request, TenantInvitationService $service): RedirectResponse
+    {
+        $validated = $request->validateWithBag('addTenant', [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+        ], [
+            'email.unique' => 'An account with this email already exists. Enter a different email.',
+        ]);
+
+        $sent = $service->createTenantAndInvite(
+            $validated['name'],
+            $validated['email'],
+            $request->user()
+        );
+
+        return redirect()
+            ->route('admin.tenant.index')
+            ->with(
+                $sent ? 'success' : 'error',
+                $sent
+                    ? 'Tenant account added and setup invitation sent.'
+                    : 'Tenant account added, but the setup invitation email could not be sent.'
+            );
     }
 
     public function update(Request $request, User $tenant): RedirectResponse
