@@ -22,15 +22,21 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::put('/admin/rooms/{room}', [RoomController::class, 'update'])->name('admin.room.update');
     Route::delete('/admin/rooms/{room}', [RoomController::class, 'destroy'])->name('admin.room.destroy');
     Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
+    Route::post('/admin/billing/tenants/{tenant}/payments', [BillingController::class, 'storePayment'])->name('admin.billing.payments.store');
+    Route::post('/admin/billing/tenants/{tenant}/charges', [BillingController::class, 'storeCharge'])->name('admin.billing.charges.store');
     Route::get('/admin/announcements', [AnnouncementController::class, 'index'])->name('admin.announcement.index');
     Route::post('/admin/announcements', [AnnouncementController::class, 'store'])->name('admin.announcement.store');
     Route::put('/admin/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('admin.announcement.update');
     Route::patch('/admin/announcements/{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('admin.announcement.pin');
     Route::delete('/admin/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
+<<<<<<< HEAD
     Route::get('/admin/absence-requests', [AbsenceRequestController::class, 'index'])->name('admin.absence-request.index');
     Route::patch('/admin/absence-requests/{absenceRequest}/approve', [AbsenceRequestController::class, 'approve'])->name('admin.absence-request.approve');
     Route::patch('/admin/absence-requests/{absenceRequest}/reject', [AbsenceRequestController::class, 'reject'])->name('admin.absence-request.reject');
+=======
+    Route::patch('/admin/maintenance/{maintenanceRequest}', [MaintenanceController::class, 'update'])->name('admin.maintenance.update');
+>>>>>>> origin/main
     Route::get('/admin/ask-dora', function () {
         return view('admin.ask-dora');
     })->name('admin.ask-dora');
@@ -38,4 +44,9 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::post('/admin/applications/{application}/reject', [ApplicationReviewController::class, 'reject'])->name('applications.reject');
     Route::delete('/admin/applications/{application}', [ApplicationReviewController::class, 'destroy'])->name('applications.destroy');
     Route::post('/applications/{application}/assign-room', [RoomAssignmentController::class, 'store'])->name('applications.assign-room');
+<<<<<<< HEAD
 });
+=======
+   
+});
+>>>>>>> origin/main

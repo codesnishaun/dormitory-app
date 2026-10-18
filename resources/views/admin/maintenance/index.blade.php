@@ -8,6 +8,22 @@
         description="Track repair requests from submission through resolution."
     />
 
+    @if (session('success'))
+        <div class="mb-6 rounded-xl border border-success/20 bg-success/10 px-4 py-3 text-sm font-semibold text-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-6 rounded-xl border border-danger/20 bg-danger/5 p-3 text-sm text-danger">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <section aria-label="Maintenance request summary" class="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ([
             ['label' => 'All requests', 'value' => $summary['total'], 'detail' => 'In the maintenance log', 'tone' => 'text-teal'],
@@ -19,7 +35,7 @@
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.12em] text-inkSoft">{{ $stat['label'] }}</p>
-                        <p data-summary-count="{{ Str::slug($stat['label']) }}" class="mt-2 font-display text-3xl font-semibold leading-none text-ink">{{ $stat['value'] }}</p>
+                        <p class="mt-2 font-display text-3xl font-semibold leading-none text-ink">{{ $stat['value'] }}</p>
                     </div>
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-paper2/70 {{ $stat['tone'] }}" aria-hidden="true">
                         <x-svg-icon name="maintenance" class="h-4.5 w-4.5" />
@@ -52,7 +68,6 @@
                     <input
                         id="maintenance-search"
                         type="search"
-                        name="search"
                         placeholder="Search requests"
                         autocomplete="off"
                         class="w-full rounded-xl border border-paper2 bg-white/70 py-2.5 pl-9 pr-3 text-sm text-ink placeholder:text-inkSoft/70 outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/15"
@@ -63,7 +78,6 @@
                     <span class="sr-only">Filter by request status</span>
                     <select
                         id="maintenance-status-filter"
-                        name="status"
                         class="w-full rounded-xl border border-paper2 bg-white/70 px-3 py-2.5 text-sm text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/15 sm:w-40"
                     >
                         <option value="">All statuses</option>
@@ -77,7 +91,6 @@
                     <span class="sr-only">Filter by request priority</span>
                     <select
                         id="maintenance-priority-filter"
-                        name="priority"
                         class="w-full rounded-xl border border-paper2 bg-white/70 px-3 py-2.5 text-sm text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/15 sm:w-36"
                     >
                         <option value="">All priorities</option>
@@ -98,65 +111,85 @@
                     data-search="{{ Str::lower(implode(' ', [$request['id'], $request['title'], $request['category'], $request['room'], $request['tenant'], $request['description']])) }}"
                     class="rounded-xl border border-paper2/90 bg-white/45 p-4 transition hover:border-teal/30 hover:bg-white/70 sm:p-5"
                 >
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div class="min-w-0 flex-1">
-                            <div class="mb-2 flex flex-wrap items-center gap-2">
-                                <span class="font-mono text-[11px] font-medium tracking-wide text-inkSoft">{{ $request['id'] }}</span>
-                                <span class="h-1 w-1 rounded-full bg-inkSoft/40" aria-hidden="true"></span>
-                                <span class="text-xs font-medium text-inkSoft">{{ $request['category'] }}</span>
-                                <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $request['priority_class'] }}">{{ $request['priority'] }} priority</span>
-                            </div>
-
-                            <h3 class="font-display text-lg font-bold leading-snug text-ink">{{ $request['title'] }}</h3>
-                            <p class="mt-1.5 max-w-3xl text-sm leading-relaxed text-inkSoft">{{ $request['description'] }}</p>
-
-                            <dl class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-inkSoft">
-                                <div class="flex items-center gap-1.5">
-                                    <dt class="font-semibold text-ink">Room</dt>
-                                    <dd>{{ $request['room'] }}</dd>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <dt class="font-semibold text-ink">Reported by</dt>
-                                    <dd>{{ $request['tenant'] }}</dd>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <dt class="font-semibold text-ink">Submitted</dt>
-                                    <dd><time datetime="{{ $request['reported_at'] }}">{{ $request['reported_at_label'] }}</time></dd>
-                                </div>
-                            </dl>
+                    <div class="min-w-0">
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <span class="font-mono text-[11px] font-medium tracking-wide text-inkSoft">{{ $request['id'] }}</span>
+                            <span class="h-1 w-1 rounded-full bg-inkSoft/40" aria-hidden="true"></span>
+                            <span class="text-xs font-medium text-inkSoft">{{ $request['category'] }}</span>
+                            <span class="rounded-full px-2.5 py-1 text-[11px] font-semibold {{ $request['priority_class'] }}">{{ $request['priority'] }} priority</span>
                         </div>
 
-                        <div class="flex items-center justify-between gap-3 border-t border-paper2/70 pt-3 lg:min-w-40 lg:flex-col lg:items-end lg:border-0 lg:pt-0">
-                            <span class="text-xs font-medium text-inkSoft lg:hidden">Update status</span>
+                        <h3 class="font-display text-lg font-bold leading-snug text-ink">{{ $request['title'] }}</h3>
+                        <p class="mt-1.5 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-inkSoft">{{ $request['description'] }}</p>
+
+                        <dl class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-xs text-inkSoft">
+                            <div class="flex items-center gap-1.5">
+                                <dt class="font-semibold text-ink">Room</dt>
+                                <dd>{{ $request['room'] }}</dd>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <dt class="font-semibold text-ink">Reported by</dt>
+                                <dd>{{ $request['tenant'] }}</dd>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <dt class="font-semibold text-ink">Submitted</dt>
+                                <dd><time datetime="{{ $request['reported_at'] }}">{{ $request['reported_at_label'] }}</time></dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <form
+                        method="POST"
+                        action="{{ route('admin.maintenance.update', $request['db_id']) }}"
+                        class="mt-4 grid gap-3 border-t border-paper2/70 pt-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
+                    >
+                        @csrf
+                        @method('PATCH')
+
+                        <label class="block space-y-1.5">
+                            <span class="text-xs font-semibold text-ink">Management note (visible to the tenant)</span>
+                            <textarea
+                                name="admin_remarks"
+                                rows="2"
+                                maxlength="1000"
+                                placeholder="Add an update or instruction for the tenant."
+                                class="w-full resize-y rounded-xl border border-paper2 bg-white px-3 py-2 text-sm text-ink outline-none transition placeholder:text-inkSoft/60 focus:border-teal focus:ring-2 focus:ring-teal/15"
+                            >{{ $request['admin_remarks'] }}</textarea>
+                        </label>
+
+                        <div class="flex items-center gap-2">
                             <label>
                                 <span class="sr-only">Update status for {{ $request['id'] }}</span>
                                 <select
-                                    name="request_status[{{ $request['id'] }}]"
-                                    data-request-status
+                                    name="status"
+                                    onchange="this.form.requestSubmit()"
                                     class="rounded-xl border border-paper2 bg-white px-3 py-2 text-sm font-semibold text-ink outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/15"
                                 >
                                     @foreach ($statuses as $status)
-                                        <option value="{{ Str::slug($status) }}" @selected($status === $request['status'])>{{ $status }}</option>
+                                        <option value="{{ $status }}" @selected($status === $request['status'])>{{ $status }}</option>
                                     @endforeach
                                 </select>
                             </label>
+                            <button type="submit" class="rounded-xl bg-copper px-4 py-2 text-sm font-semibold text-white transition hover:bg-copperDeep">
+                                Save
+                            </button>
                         </div>
-                    </div>
+                    </form>
                 </article>
             @endforeach
 
-            <div data-empty-state hidden class="rounded-xl border border-dashed border-paper2 px-5 py-12 text-center">
+            <div data-empty-state @if (count($maintenanceRequests) > 0) hidden @endif class="rounded-xl border border-dashed border-paper2 px-5 py-12 text-center">
                 <span class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-paper2/60 text-tealDeep" aria-hidden="true">
                     <x-svg-icon name="maintenance" class="h-5 w-5" />
                 </span>
-                <h3 class="mt-3 font-display text-lg font-bold text-ink">No matching requests</h3>
-                <p class="mt-1 text-sm text-inkSoft">Try adjusting your search or filters.</p>
+                <h3 class="mt-3 font-display text-lg font-bold text-ink">
+                    {{ count($maintenanceRequests) ? 'No matching requests' : 'No maintenance requests yet' }}
+                </h3>
+                <p class="mt-1 text-sm text-inkSoft">
+                    {{ count($maintenanceRequests) ? 'Try adjusting your search or filters.' : 'Requests submitted by tenants will appear here.' }}
+                </p>
             </div>
         </div>
-
-        <p class="border-t border-paper2/80 px-4 py-3 text-xs text-inkSoft sm:px-5">
-            Demo data only. Status changes are temporary and reset when you refresh.
-        </p>
     </section>
 
     <script>
@@ -166,11 +199,7 @@
         const priorityFilter = document.querySelector('#maintenance-priority-filter');
         const emptyState = document.querySelector('[data-empty-state]');
         const visibleCount = document.querySelector('[data-visible-count]');
-        const statusCounts = {
-            pending: document.querySelector('[data-summary-count="pending"]'),
-            inProgress: document.querySelector('[data-summary-count="in-progress"]'),
-            resolved: document.querySelector('[data-summary-count="resolved"]'),
-        };
+
         function filterRequests() {
             const query = searchInput.value.trim().toLowerCase();
             let visibleRequests = 0;
@@ -189,30 +218,8 @@
             emptyState.hidden = visibleRequests > 0;
         }
 
-        function updateSummary() {
-            const counts = { pending: 0, 'in-progress': 0, resolved: 0 };
-
-            maintenanceCards.forEach((card) => {
-                counts[card.dataset.status] += 1;
-            });
-
-            statusCounts.pending.textContent = counts.pending;
-            statusCounts.inProgress.textContent = counts['in-progress'];
-            statusCounts.resolved.textContent = counts.resolved;
-        }
-
         searchInput.addEventListener('input', filterRequests);
         statusFilter.addEventListener('change', filterRequests);
         priorityFilter.addEventListener('change', filterRequests);
-
-        maintenanceCards.forEach((card) => {
-            const statusSelect = card.querySelector('[data-request-status]');
-
-            statusSelect.addEventListener('change', () => {
-                card.dataset.status = statusSelect.value;
-                updateSummary();
-                filterRequests();
-            });
-        });
     </script>
 </x-admin-layout>
