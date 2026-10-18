@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminControllers\AbsenceRequestController;
 use App\Http\Controllers\AdminControllers\AnnouncementController;
 use App\Http\Controllers\AdminControllers\ApplicationReviewController;
 use App\Http\Controllers\AdminControllers\BillingController;
@@ -27,6 +28,9 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::patch('/admin/announcements/{announcement}/pin', [AnnouncementController::class, 'togglePin'])->name('admin.announcement.pin');
     Route::delete('/admin/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('admin.announcement.destroy');
     Route::get('/admin/maintenance', [MaintenanceController::class, 'index'])->name('admin.maintenance.index');
+    Route::get('/admin/absence-requests', [AbsenceRequestController::class, 'index'])->name('admin.absence-request.index');
+    Route::patch('/admin/absence-requests/{absenceRequest}/approve', [AbsenceRequestController::class, 'approve'])->name('admin.absence-request.approve');
+    Route::patch('/admin/absence-requests/{absenceRequest}/reject', [AbsenceRequestController::class, 'reject'])->name('admin.absence-request.reject');
     Route::get('/admin/ask-dora', function () {
         return view('admin.ask-dora');
     })->name('admin.ask-dora');
