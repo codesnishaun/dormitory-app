@@ -170,20 +170,23 @@
                          @if ($application->status === 'approved')
                             <form action="{{ route('applications.assign-room', $application) }}"
                                   method="POST"
-                                  class="mt-4 flex flex-wrap items-center gap-2">
+                                  class="mt-4 flex flex-wrap items-end gap-2">
                                 @csrf
 
-                                <select name="room_id" required
-                                        class="rounded-lg border border-paper2 bg-paper3 px-3 py-2 text-sm">
-                                    @foreach ($rooms as $room)
-                                        <option value="{{ $room->id }}"
-                                            @selected($room->id === $application->preferred_room_id)>
-                                            Room {{ $room->room_number }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                <x-button type="submit" variant="teal">
+                                <div>
+                                    <x-form-input
+                                        name="room_id"
+                                        label="Available Rooms"
+                                        type="select"
+                                        :value="$application->preferred_room_id"
+                                        :options="$rooms->mapWithKeys(fn ($room) => [
+                                            $room->id => 'Room ' . $room->room_number
+                                        ])->all()"
+                                        required
+                                    />
+                                </div>
+                                
+                                <x-button type="submit" variant="teal" class="!px-3.5 !py-2.5 text-[14.5px]!" >
                                     {{ $application->user_id ? 'Resend invitation' : 'Confirm room & send invitation' }}
                                 </x-button>
                             </form>
