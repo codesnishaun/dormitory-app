@@ -219,7 +219,7 @@
                 <h2 id="tenant-list-heading" class="font-display text-lg font-bold">
                     Tenant accounts <span class="text-inkSoft">({{ $tenants->total() }})</span>
                 </h2>
-                <p class="mt-1 text-sm text-inkSoft">Edit a tenant's name or email, or remove an unassigned account.</p>
+                <p class="mt-1 text-sm text-inkSoft">Edit tenant details or archive an account while preserving its history.</p>
             </div>
             <button type="button" data-tenant-create
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-tealDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
@@ -272,9 +272,9 @@
                                             class="rounded-full border border-paper2 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                             Edit
                                         </button>
-                                        <button type="button" data-tenant-delete data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
+                                        <button type="button" data-tenant-archive data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
                                             class="rounded-full border border-danger/40 px-3.5 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
-                                            Delete
+                                            Archive
                                         </button>
                                     </div>
                                 </td>
@@ -322,9 +322,9 @@
                                 class="flex-1 rounded-full border border-paper2 px-3 py-2 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                 Edit
                             </button>
-                            <button type="button" data-tenant-delete data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
+                            <button type="button" data-tenant-archive data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
                                 class="flex-1 rounded-full border border-danger/40 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
-                                Delete
+                                Archive
                             </button>
                         </div>
                     </li>
@@ -337,7 +337,44 @@
         @endif
     </section>
 
+    @if ($archivedTenants->isNotEmpty())
+        <section aria-labelledby="archived-tenants-heading" class="rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
+            <div class="mb-4">
+                <h2 id="archived-tenants-heading" class="font-display text-lg font-bold">
+                    Archived accounts <span class="text-inkSoft">({{ $archivedTenants->total() }})</span>
+                </h2>
+                <p class="mt-1 text-sm text-inkSoft">Archived accounts cannot sign in. Restore an account to make it active again.</p>
+            </div>
+
+            <ul class="flex flex-col gap-3">
+                @foreach ($archivedTenants as $archivedTenant)
+                    <li class="flex flex-col gap-3 rounded-xl border border-paper2/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="min-w-0">
+                            <p class="break-words font-semibold text-ink">{{ $archivedTenant->name }}</p>
+                            <p class="mt-0.5 break-all text-xs text-inkSoft">{{ $archivedTenant->email }}</p>
+                            <p class="mt-1 text-xs text-inkSoft">
+                                Archived {{ $archivedTenant->deleted_at?->format('M j, Y') }}
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ route('admin.tenant.restore', $archivedTenant->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                class="w-full rounded-full border border-teal/30 px-4 py-2 text-xs font-semibold text-teal transition hover:bg-teal/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal sm:w-auto">
+                                Restore account
+                            </button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="mt-5">
+                {{ $archivedTenants->links() }}
+            </div>
+        </section>
+    @endif
+
     @include('admin.tenant.create')
     @include('admin.tenant.edit')
-    @include('admin.tenant.delete')
+    @include('admin.tenant.archive')
 </x-admin-layout>

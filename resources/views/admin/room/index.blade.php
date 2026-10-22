@@ -80,7 +80,7 @@
                 @forelse ($rooms as $room)
                     <div data-room-card
                          data-status="{{ $room->status }}"
-                         data-search="{{ strtolower($room->room_number) }}"
+                         data-search="{{ strtolower($room->room_number.' '.$room->roomAssignments->pluck('user.name')->filter()->implode(' ').' '.$room->roomAssignments->pluck('user.email')->filter()->implode(' ')) }}"
                          class="h-full [&>*]:h-full">
                         <x-admin.room-card :room="$room" />
                     </div>
@@ -95,8 +95,87 @@
         </section>
     </div>
 
+    <dialog id="tenant-details-modal"
+        style="position: fixed; inset: 50% auto auto 50%; margin: 0; transform: translate(-50%, -50%); width: calc(100% - 2rem); max-width: 36rem; max-height: 90vh; overflow-y: auto;"
+        aria-labelledby="tenant-details-heading"
+        class="rounded-2xl bg-paper3 p-0 text-ink shadow-2xl backdrop:bg-ink/50">
+        <div class="flex items-start justify-between gap-4 border-b border-paper2 px-5 py-4 sm:px-6">
+            <div>
+                <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-teal">Tenant profile</p>
+                <h2 id="tenant-details-heading" class="mt-1 font-display text-xl font-bold">Tenant details</h2>
+            </div>
+            <button type="button" aria-label="Close tenant details" onclick="this.closest('dialog').close()"
+                class="rounded-lg p-2 text-inkSoft transition hover:bg-paper2 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="space-y-5 p-5 sm:p-6">
+            <section aria-labelledby="tenant-contact-heading">
+                <h3 id="tenant-contact-heading" class="text-xs font-semibold uppercase tracking-wider text-inkSoft">Contact and account</h3>
+                <dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div><dt class="text-xs text-inkSoft">Name</dt><dd id="tenant-details-name" class="mt-1 break-words text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Email</dt><dd id="tenant-details-email" class="mt-1 break-all text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Phone</dt><dd id="tenant-details-phone" class="mt-1 text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Account</dt><dd id="tenant-details-account" class="mt-1 text-sm font-semibold"></dd></div>
+                </dl>
+            </section>
+
+            <section aria-labelledby="tenant-stay-heading" class="border-t border-paper2 pt-4">
+                <h3 id="tenant-stay-heading" class="text-xs font-semibold uppercase tracking-wider text-inkSoft">Current stay</h3>
+                <dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div><dt class="text-xs text-inkSoft">Room</dt><dd id="tenant-details-room" class="mt-1 text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Assignment</dt><dd id="tenant-details-status" class="mt-1 text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Start date</dt><dd id="tenant-details-start" class="mt-1 text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">End date</dt><dd id="tenant-details-end" class="mt-1 text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Monthly rent</dt><dd id="tenant-details-rent" class="mt-1 text-sm font-semibold"></dd></div>
+                    <div><dt class="text-xs text-inkSoft">Submeter</dt><dd id="tenant-details-submeter" class="mt-1 text-sm font-semibold"></dd></div>
+                </dl>
+            </section>
+
+            <section aria-labelledby="tenant-history-heading" class="border-t border-paper2 pt-4">
+                <h3 id="tenant-history-heading" class="text-xs font-semibold uppercase tracking-wider text-inkSoft">Room assignment history</h3>
+                <ul id="tenant-details-history" class="mt-3 flex flex-col gap-2 text-sm"></ul>
+            </section>
+        </div>
+    </dialog>
+
     {{-- Filter tabs + search --}}
     <script>
+        const tenantDetails = @js($tenantDetails);
+
+        document.querySelectorAll('[data-tenant-detail]').forEach(button => {
+            button.addEventListener('click', () => {
+                const tenant = tenantDetails[button.dataset.tenantId];
+                if (!tenant) {
+                    return;
+                }
+
+                document.getElementById('tenant-details-name').textContent = tenant.name;
+                document.getElementById('tenant-details-email').textContent = tenant.email;
+                document.getElementById('tenant-details-phone').textContent = tenant.phone;
+                document.getElementById('tenant-details-account').textContent = tenant.accountStatus;
+                document.getElementById('tenant-details-room').textContent = tenant.room;
+                document.getElementById('tenant-details-status').textContent = tenant.assignmentStatus;
+                document.getElementById('tenant-details-start').textContent = tenant.startDate;
+                document.getElementById('tenant-details-end').textContent = tenant.endDate;
+                document.getElementById('tenant-details-rent').textContent = `₱${tenant.monthlyRent}`;
+                document.getElementById('tenant-details-submeter').textContent = tenant.submeter;
+
+                const history = document.getElementById('tenant-details-history');
+                history.replaceChildren();
+
+                tenant.roomHistory.forEach(assignment => {
+                    const item = document.createElement('li');
+                    item.className = 'rounded-lg bg-paper px-3 py-2';
+                    item.textContent = `${assignment.room} · ${assignment.status} · ${assignment.startDate} – ${assignment.endDate}`;
+                    history.append(item);
+                });
+
+                document.getElementById('tenant-details-modal').showModal();
+            });
+        });
+
         (function () {
             const cards  = document.querySelectorAll('[data-room-card]');
             const tabs   = document.querySelectorAll('[data-filter]');
