@@ -24,6 +24,9 @@
             @endforeach
         </div>
     @endif
+    <div class>
+
+    </div>
     <section aria-labelledby="applications-heading" class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 id="applications-heading"
