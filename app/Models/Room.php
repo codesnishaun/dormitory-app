@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Room extends Model
 {
@@ -13,4 +14,9 @@ class Room extends Model
         'submeter_number',
         'status',
     ];
+
+    public function roomAssignments(): HasMany
+    {
+        return $this->hasMany(RoomAssignment::class);
+    }
 }
