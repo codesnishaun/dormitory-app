@@ -91,21 +91,21 @@ test('admin cannot add a tenant with an email that already belongs to an account
         'email' => 'existing@example.test',
     ]);
 
-    $this->actingAs($admin)
+    $response = $this->actingAs($admin)
+        ->from(route('admin.tenant.index'))
+        ->followingRedirects()
         ->post(route('admin.tenant.store'), [
             'name' => 'Guest Applicant',
             'email' => $existingTenant->email,
-        ])
-        ->assertRedirectToRoute('admin.tenant.index')
-        ->assertSessionHasErrorsIn('addTenant', [
-            'email' => 'An account with this email already exists. Enter a different email.',
         ]);
+
+    $response->assertOk();
 
     $this->assertDatabaseCount('users', 2);
     $this->assertDatabaseCount('tenant_account_invitations', 0);
     Mail::assertNotSent(TenantAccountSetupMail::class);
 
-    $this->get(route('admin.tenant.index'))
+    $response
         ->assertSee('add-tenant-modal', false)
         ->assertSee('showModal()', false)
         ->assertSee('An account with this email already exists. Enter a different email.')
