@@ -20,6 +20,7 @@ class RoomController extends Controller
             ->with([
                 'roomAssignments' => fn ($query) => $query
                     ->where('status', 'occupied')
+                    ->whereHas('user', fn ($query) => $query->whereNull('deleted_at'))
                     ->with([
                         'application',
                         'user.roomAssignments.room',

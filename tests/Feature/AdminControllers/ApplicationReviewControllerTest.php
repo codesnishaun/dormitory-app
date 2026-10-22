@@ -11,6 +11,11 @@ uses(RefreshDatabase::class);
 
 test('admin sees remove only after an approved applicant completes account setup', function () {
     $admin = User::factory()->create(['role' => 'admin']);
+    Room::query()->create([
+        'room_number' => 'R502',
+        'capacity' => 2,
+        'monthly_rent' => 4200,
+    ]);
     $incompleteTenant = User::factory()->create(['role' => 'tenant']);
     $completedTenant = User::factory()->create(['role' => 'tenant']);
     $incompleteApplication = Application::query()->create([
@@ -52,6 +57,7 @@ test('admin sees remove only after an approved applicant completes account setup
     $this->actingAs($admin)
         ->get(route('admin.tenant.index'))
         ->assertOk()
+        ->assertSee('Room R502')
         ->assertSee('action="'.route('applications.destroy', $completedApplication).'"', false)
         ->assertDontSee('action="'.route('applications.destroy', $incompleteApplication).'"', false);
 });

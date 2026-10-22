@@ -29,6 +29,7 @@
         <x-admin-tenant-sections
             :pending-applications="$pendingApplications"
             :reviewed-applications="$reviewedApplications"
+            :rooms="$rooms"
         />
     </div>
     

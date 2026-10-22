@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Room;
 use App\Models\RoomAssignment;
+use App\Models\TenantAccountInvitation;
 use App\Models\User;
 use App\Services\TenantInvitationService;
 use Illuminate\Contracts\View\View;
@@ -114,6 +115,12 @@ class TenantController extends Controller
 
         try {
             $archived = DB::transaction(function () use ($tenant): bool {
+                $pendingInvitations = TenantAccountInvitation::query()
+                    ->where('user_id', $tenant->id)
+                    ->whereNull('used_at')
+                    ->lockForUpdate()
+                    ->get();
+
                 $lockedTenant = User::query()
                     ->lockForUpdate()
                     ->findOrFail($tenant->id);
@@ -126,6 +133,10 @@ class TenantController extends Controller
                     ->exists()) {
                     return false;
                 }
+
+                TenantAccountInvitation::query()
+                    ->whereKey($pendingInvitations->modelKeys())
+                    ->update(['expires_at' => now()]);
 
                 $lockedTenant->delete();
 

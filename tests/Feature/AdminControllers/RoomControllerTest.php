@@ -59,6 +59,17 @@ test('room inventory shows current residents and opens tenant details', function
         'start_date' => '2025-06-01',
         'end_date' => '2025-12-01',
     ]);
+    $archivedTenant = User::factory()->create([
+        'name' => 'Archived Resident',
+        'role' => 'tenant',
+    ]);
+    RoomAssignment::query()->create([
+        'user_id' => $archivedTenant->id,
+        'room_id' => $room->id,
+        'status' => 'occupied',
+        'start_date' => '2025-06-01',
+    ]);
+    $archivedTenant->delete();
 
     $this->actingAs($admin)
         ->get(route('admin.room.index'))
@@ -68,6 +79,7 @@ test('room inventory shows current residents and opens tenant details', function
         ->assertSee('casey@example.test')
         ->assertSee('555-0144')
         ->assertDontSee('Former Resident')
+        ->assertDontSee('Archived Resident')
         ->assertSee('tenant-details-modal', false)
         ->assertSee('Room assignment history');
 });

@@ -1,6 +1,7 @@
 @props([
     'pendingApplications' => null,
     'reviewedApplications' => null,
+    'rooms' => null,
 ])
 
 <section aria-labelledby="applications-heading" class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">

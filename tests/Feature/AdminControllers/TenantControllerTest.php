@@ -203,7 +203,7 @@ test('tenant update rejects a mismatched record id', function () {
     ]);
 });
 
-test('admin can archive a tenant while preserving its application and invitation history', function () {
+test('admin archives a tenant and expires its pending invitation while preserving history', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $tenant = User::factory()->create(['role' => 'tenant']);
     $application = Application::query()->create([
@@ -219,6 +219,13 @@ test('admin can archive a tenant while preserving its application and invitation
         'token_hash' => hash('sha256', 'tenant-token'),
         'expires_at' => now()->addHour(),
     ]);
+    $usedInvitation = TenantAccountInvitation::query()->create([
+        'user_id' => $tenant->id,
+        'issued_by' => $admin->id,
+        'token_hash' => hash('sha256', 'tenant-used-token'),
+        'expires_at' => now()->addHour(),
+        'used_at' => now(),
+    ]);
 
     $this->actingAs($admin)
         ->delete(route('admin.tenant.destroy', $tenant))
@@ -227,16 +234,30 @@ test('admin can archive a tenant while preserving its application and invitation
 
     $this->assertSoftDeleted('users', ['id' => $tenant->id]);
     $this->assertDatabaseHas('tenant_account_invitations', ['id' => $invitation->id]);
+    expect($invitation->fresh()->expires_at->isPast())->toBeTrue();
+    expect($invitation->fresh()->used_at)->toBeNull();
+    expect($usedInvitation->fresh()->expires_at->isFuture())->toBeTrue();
+    expect($usedInvitation->fresh()->used_at)->not->toBeNull();
     $this->assertDatabaseHas('applications', [
         'id' => $application->id,
         'user_id' => $tenant->id,
         'applicant_name' => $tenant->name,
     ]);
 
+    $this->get(route('tenant.setup.show', ['token' => 'tenant-token']))
+        ->assertNotFound();
+
     $this->get(route('admin.tenant.index'))
         ->assertSee('Archived accounts')
         ->assertSee($tenant->email)
         ->assertSee('Restore account');
+
+    $this->actingAs($admin)
+        ->patch(route('admin.tenant.restore', $tenant->id))
+        ->assertRedirectToRoute('admin.tenant.index');
+
+    $this->get(route('tenant.setup.show', ['token' => 'tenant-token']))
+        ->assertNotFound();
 });
 
 test('admin can archive a tenant with ended room assignment history', function () {
@@ -270,6 +291,12 @@ test('admin can archive a tenant with ended room assignment history', function (
 test('admin cannot archive a tenant with an active room assignment', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $tenant = User::factory()->create(['role' => 'tenant']);
+    $invitation = TenantAccountInvitation::query()->create([
+        'user_id' => $tenant->id,
+        'issued_by' => $admin->id,
+        'token_hash' => hash('sha256', 'active-tenant-token'),
+        'expires_at' => now()->addHour(),
+    ]);
     $room = Room::query()->create([
         'room_number' => 'R403',
         'capacity' => 1,
@@ -292,6 +319,7 @@ test('admin cannot archive a tenant with an active room assignment', function ()
         'user_id' => $tenant->id,
         'status' => 'occupied',
     ]);
+    expect($invitation->fresh()->expires_at->isFuture())->toBeTrue();
 });
 
 test('admin can restore an archived tenant account', function () {
