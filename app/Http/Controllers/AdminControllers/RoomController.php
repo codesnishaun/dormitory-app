@@ -18,6 +18,7 @@ class RoomController extends Controller
     {
         $rooms = Room::query()
             ->with([
+                'currentMeterAssignment.submeter',
                 'roomAssignments' => fn ($query) => $query
                     ->where('status', 'occupied')
                     ->whereHas('user', fn ($query) => $query->whereNull('deleted_at'))
@@ -54,7 +55,7 @@ class RoomController extends Controller
                     'startDate' => $assignment->start_date?->format('M j, Y') ?? 'Not recorded',
                     'endDate' => $assignment->end_date?->format('M j, Y') ?? 'Current stay',
                     'monthlyRent' => number_format((float) $room->monthly_rent, 2),
-                    'submeter' => $room->submeter_number ?? 'Not assigned',
+                    'submeter' => $room->currentMeterAssignment?->submeter?->meter_number ?? 'Not assigned',
                     'roomHistory' => $tenant->roomAssignments
                         ->map(fn (RoomAssignment $history) => [
                             'room' => $history->room?->room_number ?? 'Room unavailable',
