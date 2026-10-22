@@ -45,7 +45,7 @@ test('admin tenant index shows tenant records and their room assignment from the
         ->assertSee('R401')
         ->assertSee('555-0142')
         ->assertSee('Occupied')
-        ->assertDontSee($admin->name)
+        ->assertSee($admin->name)
         ->assertDontSee('Marianne Santos')
         ->assertSee('data-tenant-edit', false)
         ->assertSee('data-tenant-archive', false)

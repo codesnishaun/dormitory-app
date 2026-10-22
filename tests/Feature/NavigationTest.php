@@ -53,7 +53,11 @@ test('admin navigation links open their destination pages', function (string $de
     'dashboard' => 'admin.dashboard',
     'tenants' => 'admin.tenant.index',
     'rooms' => 'admin.room.index',
+    'submeters' => 'admin.submeter.index',
+    'meter assignments' => 'admin.meter-assignments.index',
     'billing' => 'admin.billing.index',
+    'electricity bills' => 'admin.electricity-bills.index',
+    'absence requests' => 'admin.absence-request.index',
     'announcements' => 'admin.announcement.index',
     'maintenance' => 'admin.maintenance.index',
     'ask dora' => 'admin.ask-dora',
@@ -71,10 +75,46 @@ test('tenant navigation links open their destination pages', function (string $d
     'home logo' => 'home',
     'dashboard' => 'tenant.dashboard',
     'room and bill' => 'tenant.room-bill',
+    'absence requests' => 'tenant.absence-request',
     'announcements' => 'tenant.announcements',
     'maintenance' => 'tenant.maintenance',
     'ask dora' => 'tenant.ask-dora',
 ]);
+
+test('admin and tenant sidebars show role-specific navigation groups and active styling', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.electricity-bills.index'))
+        ->assertOk()
+        ->assertSee('Overview')
+        ->assertSee('Dormitory management')
+        ->assertSee('Utilities & billing')
+        ->assertSee('Operations')
+        ->assertSee('Communication')
+        ->assertSee('border-l-copper', false)
+        ->assertSee('peer-checked:flex', false)
+        ->assertSee('md:w-72', false)
+        ->assertDontSee('My stay')
+        ->assertSee('Electricity bills')
+        ->assertSee('Absence requests');
+
+    $this->actingAs($tenant)
+        ->get(route('tenant.room-bill'))
+        ->assertOk()
+        ->assertSee('Overview')
+        ->assertSee('My stay')
+        ->assertSee('Services')
+        ->assertSee('Communication')
+        ->assertSee('border-l-copper', false)
+        ->assertSee('peer-checked:flex', false)
+        ->assertSee('md:w-72', false)
+        ->assertSee('Absence requests')
+        ->assertDontSee('Dormitory management')
+        ->assertDontSee('Electricity bills')
+        ->assertDontSee('Meter assignments');
+});
 
 test('authenticated users can use the logout navigation button', function (string $role, string $dashboardRoute) {
     $user = User::factory()->create(['role' => $role]);
