@@ -1,32 +1,13 @@
 <x-admin-layout>
     <x-slot:title>Billing</x-slot:title>
 
-    @php
-        // Static preview records for the billing dashboard; these are not connected to saved transactions.
-        $tenantBalances = [
-            ['name' => 'Marianne Santos', 'room' => 'R101', 'balance' => 0, 'date' => '2026-08-01', 'activity' => 'Payment', 'amount' => 3920],
-            ['name' => 'Jomar Cruz', 'room' => 'R102', 'balance' => 450, 'date' => '2026-08-02', 'activity' => 'Payment', 'amount' => 3500],
-            ['name' => 'Angeline Reyes', 'room' => 'R103', 'balance' => 0, 'date' => '2026-08-02', 'activity' => 'Payment', 'amount' => 2172],
-            ['name' => 'Bea Villanueva', 'room' => 'R103', 'balance' => 0, 'date' => '2026-08-02', 'activity' => 'Payment', 'amount' => 2172],
-            ['name' => 'Carlo Mendoza', 'room' => 'R104', 'balance' => 1200, 'date' => '2026-07-28', 'activity' => 'Charge', 'amount' => 1200],
-            ['name' => 'Dianne Aquino', 'room' => 'R201', 'balance' => 0, 'date' => '2026-08-03', 'activity' => 'Payment', 'amount' => 4304],
-            ['name' => 'Ederick Bautista', 'room' => 'R203', 'balance' => 0, 'date' => '2026-08-03', 'activity' => 'Payment', 'amount' => 3636],
-        ];
-
-        $recentTransactions = [
-            ['date' => '2026-08-03', 'tenant' => 'Dianne Aquino', 'room' => 'R201', 'type' => 'Payment', 'amount' => 4304, 'note' => 'August rent + electric'],
-            ['date' => '2026-08-03', 'tenant' => 'Ederick Bautista', 'room' => 'R203', 'type' => 'Payment', 'amount' => 3636, 'note' => 'August rent + electric'],
-            ['date' => '2026-08-02', 'tenant' => 'Jomar Cruz', 'room' => 'R102', 'type' => 'Payment', 'amount' => 3500, 'note' => 'August rent payment'],
-            ['date' => '2026-07-28', 'tenant' => 'Carlo Mendoza', 'room' => 'R104', 'type' => 'Charge', 'amount' => 1200, 'note' => 'Water and shared utilities'],
-        ];
-
-        $outstandingBalance = array_sum(array_column($tenantBalances, 'balance'));
-        $tenantsInGoodStanding = count(array_filter($tenantBalances, fn ($tenant) => $tenant['balance'] === 0));
-    @endphp
 
     <div class="mx-auto w-full space-y-6 pb-4 sm:space-y-8">
         {{-- Billing overview and quick context. --}}
         <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        @if (session('success'))
+            <div class="rounded-xl bg-success/15 px-4 py-3 text-sm text-success">{{ session('success') }}</div>
+        @endif
             <div>
                 <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-teal/15 bg-teal/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-teal">
                     <span class="h-1.5 w-1.5 rounded-full bg-teal"></span>
@@ -39,7 +20,7 @@
                 <svg class="h-4 w-4 shrink-0 text-teal" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                     <path d="M5 3.5h10M5 7h10M5 10.5h6M4 16.5h12a1 1 0 0 0 1-1v-11a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1Z" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-                <span><span class="font-semibold text-ink">August 2026</span> billing period</span>
+                <span><span class="font-semibold text-ink">{{ $billingPeriod }}</span> billing period</span>
             </div>
         </header>
 
@@ -55,7 +36,7 @@
                     <path d="M10 2.75v14.5m4-10.75c-.55-.92-1.65-1.5-3.25-1.5h-1.5a2.75 2.75 0 0 0 0 5.5h1.5a2.75 2.75 0 0 1 0 5.5h-2c-1.6 0-2.7-.58-3.25-1.5" stroke-linecap="round" />
                 </svg>
             </x-admin.room-stat>
-            <x-admin.room-stat title="Collected this month" value="₱0.00" description="Across 7 accounts" tone="success">
+           <x-admin.room-stat title="Collected this month" :value="'₱'.number_format($collectedThisMonth, 2)" :description="'Across '.count($tenantBalances).' accounts'" tone="success">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                     <path d="M4 10.5 8 14l8-8M3 3.5h14v13H3z" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
@@ -63,7 +44,7 @@
             <x-admin.room-stat title="Tenants in good standing" :value="$tenantsInGoodStanding.'/'.count($tenantBalances)" description="Zero balance" tone="success">
                 <x-svg-icon name="tenants" class="h-4 w-4" />
             </x-admin.room-stat>
-            <x-admin.room-stat title="Total transactions logged" value="7" description="All-time" tone="ink">
+            <x-admin.room-stat title="Total transactions logged" :value="$totalTransactions" description="All-time" tone="ink">
                 <x-svg-icon name="billing" class="h-4 w-4" />
             </x-admin.room-stat>
         </section>
@@ -81,7 +62,7 @@
                         <circle cx="8.75" cy="8.75" r="5.75" />
                         <path d="m13 13 4 4" stroke-linecap="round" />
                     </svg>
-                    <input type="search" placeholder="Search tenants" class="h-10 w-full rounded-lg border border-ink/10 bg-white/70 pl-9 pr-3 text-sm text-ink outline-none transition placeholder:text-inkSoft/55 focus:border-teal focus:ring-2 focus:ring-teal/15">
+                    <input id="billing-search" type="search" placeholder="Search tenants" class="h-10 w-full rounded-lg border border-ink/10 bg-white/70 pl-9 pr-3 text-sm text-ink outline-none transition placeholder:text-inkSoft/55 focus:border-teal focus:ring-2 focus:ring-teal/15">
                 </label>
             </div>
 
@@ -94,8 +75,8 @@
             </div>
 
             <div class="divide-y divide-ink/6">
-                @foreach ($tenantBalances as $tenant)
-                    <article data-billing-row class="grid gap-3 px-4 py-4 transition hover:bg-paper/45 sm:px-6 min-[1200px]:grid-cols-[minmax(0,2.6fr)_minmax(48px,0.6fr)_minmax(95px,1.1fr)_minmax(180px,2.5fr)_minmax(285px,3.2fr)] min-[1200px]:items-center">
+                @forelse ($tenantBalances as $tenant)
+                    <article data-billing-row data-search="{{ strtolower($tenant['name'] . ' ' . $tenant['room']) }}" class="grid gap-3 px-4 py-4 transition hover:bg-paper/45 sm:px-6 min-[1200px]:grid-cols-[minmax(0,2.6fr)_minmax(48px,0.6fr)_minmax(95px,1.1fr)_minmax(180px,2.5fr)_minmax(285px,3.2fr)] min-[1200px]:items-center">
                         <div class="flex min-w-0 items-center gap-3">
                             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal/10 text-[11px] font-bold text-teal">
                                 {{ collect(explode(' ', $tenant['name']))->map(fn ($part) => substr($part, 0, 1))->take(2)->implode('') }}
@@ -123,31 +104,33 @@
                         <div data-billing-activity class="flex items-center justify-between gap-2 text-xs text-inkSoft min-[1200px]:block">
                             <span data-billing-mobile-label class="text-[11px] font-medium text-inkSoft min-[1200px]:hidden">Last transaction</span>
                             <span class="text-right min-[1200px]:text-left">
-                                <span class="block text-ink">{{ $tenant['date'] }}</span>
-                                <span>{{ $tenant['activity'] }} · ₱{{ number_format($tenant['amount'], 2) }}</span>
+                                <span class="block text-ink">{{ $tenant['date'] ?? '—' }}</span>
+                                <span>{{ $tenant['activity'] ? $tenant['activity'] . ' · ₱' . number_format($tenant['amount'], 2) : 'No transactions yet' }}</span>
                             </span>
                         </div>
 
                         <div class="flex min-w-0 flex-wrap gap-2 xl:flex-nowrap">
-                            <button type="button" class="inline-flex h-9 min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-lg bg-teal px-2 text-[10px] font-semibold text-white transition hover:bg-tealDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                            <button type="button" onclick="openPayment({{ $tenant['id'] }}, @js($tenant['name']))" class="inline-flex h-9 min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-lg bg-teal px-2 text-[10px] font-semibold text-white transition hover:bg-tealDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal" >
                                 <span class="xl:hidden">Payment</span>
                                 <span class="hidden xl:inline">Record payment</span>
                             </button>
-                            <button type="button" class="inline-flex h-9 min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-ink/12 bg-paper3 px-2 text-[10px] font-semibold text-ink transition hover:border-teal/40 hover:bg-teal/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                            <button type="button" onclick="openCharge({{ $tenant['id'] }}, @js($tenant['name']))" class="inline-flex h-9 min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-ink/12 bg-paper3 px-2 text-[10px] font-semibold text-ink transition hover:border-teal/40 hover:bg-teal/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                 <span class="xl:hidden">Charge</span>
                                 <span class="hidden xl:inline">Add charge</span>
                             </button>
-                            <button type="button" class="inline-flex h-9 min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-ink/12 bg-transparent px-2 text-[10px] font-semibold text-inkSoft transition hover:border-ink/25 hover:bg-ink/5 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                            <button type="button" onclick="document.getElementById('history-{{ $tenant['id'] }}').showModal()" class="inline-flex h-9 min-w-0 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-ink/12 bg-transparent px-2 text-[10px] font-semibold text-inkSoft transition hover:border-ink/25 hover:bg-ink/5 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                 History
                             </button>
                         </div>
                     </article>
-                @endforeach
+                @empty
+                    <p class="px-6 py-10 text-center text-sm text-inkSoft">No tenant accounts yet.</p>
+                @endforelse
             </div>
 
             <div class="flex flex-col gap-2 border-t border-ink/8 bg-paper/35 px-4 py-3 text-xs text-inkSoft sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <span>Showing {{ count($tenantBalances) }} tenant accounts</span>
-                <span>Balances reflect the sample preview data.</span>
+                <span>Balance = total charges − total payments.</span>
             </div>
         </section>
 
@@ -170,7 +153,7 @@
             </div>
 
             <div class="divide-y divide-ink/6">
-                @foreach ($recentTransactions as $transaction)
+                @forelse ($recentTransactions as $transaction)
                     <article data-transaction-row class="grid gap-3 px-4 py-4 text-sm sm:px-6 min-[1024px]:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,3fr)] min-[1024px]:items-center">
                         <time class="text-xs text-inkSoft">{{ $transaction['date'] }}</time>
                         <div class="min-w-0">
@@ -181,8 +164,29 @@
                         <span class="font-mono text-sm font-medium text-ink">₱{{ number_format($transaction['amount'], 2) }}</span>
                         <p class="text-xs leading-5 text-inkSoft">{{ $transaction['note'] }}</p>
                     </article>
-                @endforeach
+                @empty
+                    <p class="px-6 py-10 text-center text-sm text-inkSoft">No transactions recorded yet.</p>
+                @endforelse
             </div>
+        
         </section>
     </div>
+
+    @include('admin.billing.payment')
+    @include('admin.billing.charge')
+    @include('admin.billing.history')
+
+    <script>
+        (function () {
+            const input = document.getElementById('billing-search');
+            const rows = document.querySelectorAll('[data-billing-row]');
+            input.addEventListener('input', () => {
+                const q = input.value.trim().toLowerCase();
+                rows.forEach(row => {
+                    row.style.display = (!q || row.dataset.search.includes(q)) ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+
 </x-admin-layout>

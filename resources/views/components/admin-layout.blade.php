@@ -50,6 +50,15 @@
                     :href="route('admin.maintenance.index')"
                     :active="request()->routeIs('admin.maintenance.index')"
                 ><x-svg-icon name="maintenance" />Maintenance</x-button>
+                
+                <x-button
+                    variant="sidebar"
+                    :href="route('admin.absence-request.index')"
+                    :active="request()->routeIs('admin.absence-request.*')"
+                >
+                 <x-svg-icon name="tenants" />Absence requests
+                </x-button>
+
 
                 <x-button
                     variant="sidebar"
