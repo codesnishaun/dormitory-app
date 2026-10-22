@@ -6,9 +6,13 @@ use App\Http\Controllers\AdminControllers\AnnouncementController;
 use App\Http\Controllers\AdminControllers\ApplicationReviewController;
 use App\Http\Controllers\AdminControllers\BillingController;
 use App\Http\Controllers\AdminControllers\DashboardController as AdminDashboardController;
+use App\Http\Controllers\AdminControllers\ElectricityBillController;
 use App\Http\Controllers\AdminControllers\MaintenanceController;
+use App\Http\Controllers\AdminControllers\MeterAssignmentController;
+use App\Http\Controllers\AdminControllers\MeterReadingController;
 use App\Http\Controllers\AdminControllers\RoomAssignmentController;
 use App\Http\Controllers\AdminControllers\RoomController;
+use App\Http\Controllers\AdminControllers\SubmeterController;
 use App\Http\Controllers\AdminControllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +29,21 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::post('/admin/rooms', [RoomController::class, 'store'])->name('admin.room.store');
     Route::put('/admin/rooms/{room}', [RoomController::class, 'update'])->name('admin.room.update');
     Route::delete('/admin/rooms/{room}', [RoomController::class, 'destroy'])->name('admin.room.destroy');
+
+    Route::get('/admin/submeters', [SubmeterController::class, 'index'])->name('admin.submeter.index');
+    Route::post('/admin/submeters', [SubmeterController::class, 'store'])->name('admin.submeter.store');
+    Route::put('/admin/submeters/{submeter}', [SubmeterController::class, 'update'])->name('admin.submeter.update');
+    Route::patch('/admin/submeters/{submeter}/retire', [SubmeterController::class, 'retire'])->name('admin.submeter.retire');
+
+    Route::get('/admin/meter-assignments', [MeterAssignmentController::class, 'index'])->name('admin.meter-assignments.index');
+    Route::post('/admin/meter-assignments', [MeterAssignmentController::class, 'store'])->name('admin.meter-assignments.store');
+    Route::patch('/admin/meter-assignments/{meterAssignment}/close', [MeterAssignmentController::class, 'close'])->name('admin.meter-assignments.close');
+    Route::post('/admin/meter-assignments/{meterAssignment}/readings', [MeterReadingController::class, 'store'])->name('admin.meter-readings.store');
+
+    Route::get('/admin/electricity-bills', [ElectricityBillController::class, 'index'])->name('admin.electricity-bills.index');
+    Route::post('/admin/electricity-bills/preview', [ElectricityBillController::class, 'preview'])->name('admin.electricity-bills.preview');
+    Route::post('/admin/electricity-bills/finalize', [ElectricityBillController::class, 'finalize'])->name('admin.electricity-bills.finalize');
+    Route::get('/admin/electricity-bills/{electricityBill}', [ElectricityBillController::class, 'show'])->name('admin.electricity-bills.show');
 
     Route::get('/admin/billing', [BillingController::class, 'index'])->name('admin.billing.index');
     Route::post('/admin/billing/tenants/{tenant}/payments', [BillingController::class, 'storePayment'])->name('admin.billing.payments.store');
