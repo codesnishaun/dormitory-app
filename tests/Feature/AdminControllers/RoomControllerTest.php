@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Application;
 use App\Models\Room;
+use App\Models\RoomAssignment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -16,6 +18,58 @@ test('admin can navigate to room management from the sidebar', function () {
         ->assertSee('All rooms')
         ->assertSee('Add room')
         ->assertSee('action="'.route('admin.room.store').'"', false);
+});
+
+test('room inventory shows current residents and opens tenant details', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $room = Room::query()->create([
+        'room_number' => 'R401',
+        'capacity' => 2,
+        'monthly_rent' => 4200,
+        'submeter_number' => 'MTR-401',
+        'status' => 'occupied',
+    ]);
+    $tenant = User::factory()->create([
+        'name' => 'Casey Resident',
+        'email' => 'casey@example.test',
+        'role' => 'tenant',
+    ]);
+    $application = Application::query()->create([
+        'applicant_name' => $tenant->name,
+        'email' => $tenant->email,
+        'phone' => '555-0144',
+        'move_in_date' => '2026-06-01',
+        'user_id' => $tenant->id,
+    ]);
+    RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'application_id' => $application->id,
+        'status' => 'occupied',
+        'start_date' => '2026-06-01',
+    ]);
+    $formerTenant = User::factory()->create([
+        'name' => 'Former Resident',
+        'role' => 'tenant',
+    ]);
+    RoomAssignment::query()->create([
+        'user_id' => $formerTenant->id,
+        'room_id' => $room->id,
+        'status' => 'ended',
+        'start_date' => '2025-06-01',
+        'end_date' => '2025-12-01',
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.room.index'))
+        ->assertSee('Current residents (1/2)')
+        ->assertSee('data-tenant-detail', false)
+        ->assertSee('Casey Resident')
+        ->assertSee('casey@example.test')
+        ->assertSee('555-0144')
+        ->assertDontSee('Former Resident')
+        ->assertSee('tenant-details-modal', false)
+        ->assertSee('Room assignment history');
 });
 
 test('guest is redirected to login when opening room management', function () {

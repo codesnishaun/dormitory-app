@@ -24,194 +24,14 @@
             @endforeach
         </div>
     @endif
-    <section aria-labelledby="applications-heading" class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="applications-heading"
-                class="font-display text-lg font-bold">
-                Applications awaiting review
-            </h2>
 
-            <span class="rounded-full bg-paper2 px-3 py-1 text-xs font-semibold text-inkSoft">
-                {{ $pendingApplications->count() }} pending
-            </span>
-        </div>
-
-        @if ($pendingApplications->isEmpty())
-            <div class="flex min-h-28 items-center justify-center py-5 text-center">
-                <p class="text-sm text-inkSoft">
-                    No pending applications right now.
-                </p>
-            </div>
-        @else
-            <ul class="mt-4 flex flex-col gap-3">
-                @foreach ($pendingApplications as $application)
-                    <li class="rounded-xl border border-paper2/80 p-4">
-                        <div class="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                                <h3 class="font-semibold">
-                                    {{ $application->applicant_name }}
-                                </h3>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    {{ $application->email }}
-                                </p>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    Contact: {{ $application->phone }}
-                                </p>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    Preferred room:
-                                    {{ $application->preferredRoom?->room_number ?? 'No preference' }}
-                                </p>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    Move-in date:
-                                    {{ $application->move_in_date }}
-                                </p>
-                            </div>
-
-                            <span class="rounded-full bg-copper/10 px-2.5 py-1 text-xs font-semibold text-copperDeep">
-                                Pending review
-                            </span>
-                        </div>
-
-                        @if ($application->message)
-                            <p class="mt-3 text-sm text-inkSoft">
-                                {{ $application->message }}
-                            </p>
-                        @endif
-                        
-                            <div class="mt-4 flex flex-wrap gap-2">
-                            <form action="{{ route('applications.approve', $application) }}" method="POST">
-                                @csrf
-                                <x-button
-                                    type="submit"
-                                    variant="teal"
-                                >
-                                    Approve
-                                </x-button>
-                            </form>
-
-                            <form action="{{ route('applications.reject', $application) }}"  method="POST">
-                                @csrf
-                                <x-button
-                                    type="submit"
-                                    variant="danger"
-                                >
-                                    Reject
-                                </x-button>
-                            </form>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </section>
-
-    <section aria-labelledby="reviewed-applications-heading"
-        class="mb-6 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
-
-        <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="reviewed-applications-heading"
-                class="font-display text-lg font-bold">
-                Recently Reviewed Applications
-            </h2>
-
-            <span class="rounded-full bg-paper2 px-3 py-1 text-xs font-semibold text-inkSoft">
-                {{ $reviewedApplications->count() }} reviewed
-            </span>
-        </div>
-
-        @if ($reviewedApplications->isEmpty())
-            <div class="flex min-h-28 items-center justify-center py-5 text-center">
-                <p class="text-sm text-inkSoft">
-                    No reviewed applications yet.
-                </p>
-            </div>
-        @else
-            <ul class="mt-4 flex flex-col gap-3">
-                @foreach ($reviewedApplications as $application)
-                    <li class="rounded-xl border border-paper2/80 p-4">
-                        <div class="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                                <h3 class="font-semibold">
-                                    {{ $application->applicant_name }}
-                                </h3>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    {{ $application->email }}
-                                </p>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    Preferred room:
-                                    {{ $application->preferredRoom?->room_number ?? 'No preference' }}
-                                </p>
-
-                                <p class="mt-1 text-sm text-inkSoft">
-                                    Reviewed:
-                                    {{ $application->reviewed_at ?? 'Date unavailable' }}
-                                </p>
-
-                                @if ($application->admin_remarks)
-                                    <p class="mt-2 text-sm text-inkSoft">
-                                        Remarks: {{ $application->admin_remarks }}
-                                    </p>
-                                @endif
-                            </div>
-
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="rounded-full px-3 py-1 text-xs font-semibold
-                                    {{ $application->status === 'approved'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800' }}">
-                                    {{ ucfirst($application->status) }}
-                                </span>
-
-                                @if ($application->status === 'approved' && ($application->user?->tenantAccountInvitations->isNotEmpty() ?? false))
-                                    <form
-                                        action="{{ route('applications.destroy', $application) }}"
-                                        method="POST"
-                                        onsubmit="return confirm('Remove this reviewed application? This action cannot be undone.')">
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <x-button type="submit" variant="danger" size="sm">
-                                            Remove
-                                        </x-button>
-                                    </form>
-                                @endif
-                            </div>
-                        </div>
-                         @if ($application->status === 'approved')
-                            <form action="{{ route('applications.assign-room', $application) }}"
-                                  method="POST"
-                                  class="mt-4 flex flex-wrap items-end gap-2">
-                                @csrf
-
-                                <div>
-                                    <x-form-input
-                                        name="room_id"
-                                        label="Available Rooms"
-                                        type="select"
-                                        :value="$application->preferred_room_id"
-                                        :options="$rooms->mapWithKeys(fn ($room) => [
-                                            $room->id => 'Room ' . $room->room_number
-                                        ])->all()"
-                                        required
-                                    />
-                                </div>
-                                
-                                <x-button type="submit" variant="teal" class="!px-3.5 !py-2.5 text-[14.5px]!" >
-                                    {{ $application->user_id ? 'Resend invitation' : 'Confirm room & send invitation' }}
-                                </x-button>
-                            </form>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </section>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <x-admin-tenant-sections
+            :pending-applications="$pendingApplications"
+            :reviewed-applications="$reviewedApplications"
+        />
+    </div>
+    
 
     <section aria-labelledby="tenant-list-heading" class="rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -219,7 +39,7 @@
                 <h2 id="tenant-list-heading" class="font-display text-lg font-bold">
                     Tenant accounts <span class="text-inkSoft">({{ $tenants->total() }})</span>
                 </h2>
-                <p class="mt-1 text-sm text-inkSoft">Edit a tenant's name or email, or remove an unassigned account.</p>
+                <p class="mt-1 text-sm text-inkSoft">Edit tenant details or archive an account while preserving its history.</p>
             </div>
             <button type="button" data-tenant-create
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-tealDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
@@ -272,9 +92,9 @@
                                             class="rounded-full border border-paper2 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                             Edit
                                         </button>
-                                        <button type="button" data-tenant-delete data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
+                                        <button type="button" data-tenant-archive data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
                                             class="rounded-full border border-danger/40 px-3.5 py-1.5 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
-                                            Delete
+                                            Archive
                                         </button>
                                     </div>
                                 </td>
@@ -322,9 +142,9 @@
                                 class="flex-1 rounded-full border border-paper2 px-3 py-2 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                 Edit
                             </button>
-                            <button type="button" data-tenant-delete data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
+                            <button type="button" data-tenant-archive data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}"
                                 class="flex-1 rounded-full border border-danger/40 px-3 py-2 text-xs font-semibold text-danger transition hover:bg-danger/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger">
-                                Delete
+                                Archive
                             </button>
                         </div>
                     </li>
@@ -337,7 +157,44 @@
         @endif
     </section>
 
+    @if ($archivedTenants->isNotEmpty())
+        <section aria-labelledby="archived-tenants-heading" class="rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
+            <div class="mb-4">
+                <h2 id="archived-tenants-heading" class="font-display text-lg font-bold">
+                    Archived accounts <span class="text-inkSoft">({{ $archivedTenants->total() }})</span>
+                </h2>
+                <p class="mt-1 text-sm text-inkSoft">Archived accounts cannot sign in. Restore an account to make it active again.</p>
+            </div>
+
+            <ul class="flex flex-col gap-3">
+                @foreach ($archivedTenants as $archivedTenant)
+                    <li class="flex flex-col gap-3 rounded-xl border border-paper2/80 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="min-w-0">
+                            <p class="break-words font-semibold text-ink">{{ $archivedTenant->name }}</p>
+                            <p class="mt-0.5 break-all text-xs text-inkSoft">{{ $archivedTenant->email }}</p>
+                            <p class="mt-1 text-xs text-inkSoft">
+                                Archived {{ $archivedTenant->deleted_at?->format('M j, Y') }}
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ route('admin.tenant.restore', $archivedTenant->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit"
+                                class="w-full rounded-full border border-teal/30 px-4 py-2 text-xs font-semibold text-teal transition hover:bg-teal/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal sm:w-auto">
+                                Restore account
+                            </button>
+                        </form>
+                    </li>
+                @endforeach
+            </ul>
+
+            <div class="mt-5">
+                {{ $archivedTenants->links() }}
+            </div>
+        </section>
+    @endif
+
     @include('admin.tenant.create')
     @include('admin.tenant.edit')
-    @include('admin.tenant.delete')
+    @include('admin.tenant.archive')
 </x-admin-layout>

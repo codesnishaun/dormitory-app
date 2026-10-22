@@ -15,15 +15,15 @@ class Transaction extends Model
     protected function casts(): array
     {
         return [
-            'amount'           => 'decimal:2',
+            'amount' => 'decimal:2',
             'transaction_date' => 'date',
-            'due_date'         => 'date',
+            'due_date' => 'date',
         ];
     }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     public function recorder(): BelongsTo

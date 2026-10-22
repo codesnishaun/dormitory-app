@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Room;
 use App\Models\RoomAssignment;
-use App\Models\TenantAccountInvitation;
 use App\Models\User;
 use App\Services\TenantInvitationService;
 use Illuminate\Contracts\View\View;
@@ -32,6 +31,11 @@ class TenantController extends Controller
             ->orderBy('name')
             ->paginate(15);
 
+        $archivedTenants = User::onlyTrashed()
+            ->where('role', 'tenant')
+            ->orderByDesc('deleted_at')
+            ->paginate(15, ['*'], 'archived_page');
+
         $pendingApplications = Application::query()
             ->where('status', 'pending')
             ->with('preferredRoom')
@@ -50,7 +54,13 @@ class TenantController extends Controller
 
         $rooms = Room::orderBy('room_number')->get();
 
-        return view('admin.tenant.index', compact('tenants', 'pendingApplications', 'reviewedApplications', 'rooms'));
+        return view('admin.tenant.index', compact(
+            'tenants',
+            'archivedTenants',
+            'pendingApplications',
+            'reviewedApplications',
+            'rooms',
+        ));
     }
 
     public function store(Request $request, TenantInvitationService $service): RedirectResponse
@@ -103,24 +113,19 @@ class TenantController extends Controller
         abort_unless($tenant->role === 'tenant', 404);
 
         try {
-            $deleted = DB::transaction(function () use ($tenant): bool {
+            $archived = DB::transaction(function () use ($tenant): bool {
                 $lockedTenant = User::query()
                     ->lockForUpdate()
                     ->findOrFail($tenant->id);
 
                 abort_unless($lockedTenant->role === 'tenant', 404);
 
-                if (RoomAssignment::query()->where('user_id', $lockedTenant->id)->exists()) {
+                if (RoomAssignment::query()
+                    ->where('user_id', $lockedTenant->id)
+                    ->whereIn('status', ['reserved', 'occupied'])
+                    ->exists()) {
                     return false;
                 }
-
-                Application::query()
-                    ->where('user_id', $lockedTenant->id)
-                    ->update(['user_id' => null]);
-
-                TenantAccountInvitation::query()
-                    ->where('user_id', $lockedTenant->id)
-                    ->delete();
 
                 $lockedTenant->delete();
 
@@ -131,17 +136,30 @@ class TenantController extends Controller
 
             return redirect()
                 ->route('admin.tenant.index')
-                ->with('error', 'This tenant is linked to other records and cannot be deleted.');
+                ->with('error', 'This tenant could not be archived because of linked records.');
         }
 
-        if (! $deleted) {
+        if (! $archived) {
             return redirect()
                 ->route('admin.tenant.index')
-                ->with('error', 'This tenant has room assignment history and cannot be deleted.');
+                ->with('error', 'This tenant still has an active or reserved room assignment. End or cancel it before archiving this account.');
         }
 
         return redirect()
             ->route('admin.tenant.index')
-            ->with('success', 'Tenant deleted.');
+            ->with('success', 'Tenant archived. Room assignment and account history have been preserved.');
+    }
+
+    public function restore(int $tenant): RedirectResponse
+    {
+        $archivedTenant = User::onlyTrashed()
+            ->where('role', 'tenant')
+            ->findOrFail($tenant);
+
+        $archivedTenant->restore();
+
+        return redirect()
+            ->route('admin.tenant.index')
+            ->with('success', 'Tenant account restored.');
     }
 }

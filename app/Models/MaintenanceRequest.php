@@ -42,7 +42,7 @@ class MaintenanceRequest extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     public function roomAssignment(): BelongsTo
@@ -53,6 +53,6 @@ class MaintenanceRequest extends Model
     // Display ID such as MR-0012
     public function getReferenceAttribute(): string
     {
-        return 'MR-' . str_pad((string) $this->id, 4, '0', STR_PAD_LEFT);
+        return 'MR-'.str_pad((string) $this->id, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -65,7 +65,7 @@ class TenantInvitationService
                     ]);
                 }
 
-                if (User::where('email', $application->email)->exists()) {
+                if (User::withTrashed()->where('email', $application->email)->exists()) {
                     throw ValidationException::withMessages([
                         'application' => 'An account with this email already exists.',
                     ]);

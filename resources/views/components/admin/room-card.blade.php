@@ -35,6 +35,33 @@
             </div>
         </dl>
 
+        <div class="mt-4 border-t border-ink/6 pt-4">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-inkSoft">
+                Current residents ({{ $room->roomAssignments->count() }}/{{ $room->capacity }})
+            </h4>
+
+            @if ($room->roomAssignments->isEmpty())
+                <p class="mt-2 text-sm text-inkSoft">No current residents recorded.</p>
+            @else
+                <ul class="mt-2 flex flex-col gap-2">
+                    @foreach ($room->roomAssignments as $assignment)
+                        @if ($assignment->user)
+                            <li>
+                                <button type="button" data-tenant-detail data-tenant-id="{{ $assignment->user->id }}"
+                                    class="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-teal/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
+                                    <span class="min-w-0">
+                                        <span class="block truncate text-sm font-semibold text-ink">{{ $assignment->user->name }}</span>
+                                        <span class="block truncate text-xs text-inkSoft">{{ $assignment->user->email }}</span>
+                                    </span>
+                                    <span class="shrink-0 text-xs font-semibold text-teal">View details</span>
+                                </button>
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+
        <div class="mt-3 flex justify-end gap-2 border-t border-ink/6 pt-3">
         <button type="button"
             onclick="openEditRoom(@js($room->only(['id', 'room_number', 'capacity', 'monthly_rent', 'submeter_number', 'status'])))"
