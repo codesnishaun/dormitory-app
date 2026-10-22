@@ -48,8 +48,8 @@ test('admin tenant index shows tenant records and their room assignment from the
         ->assertDontSee($admin->name)
         ->assertDontSee('Marianne Santos')
         ->assertSee('data-tenant-edit', false)
-        ->assertSee('data-tenant-delete', false)
-        ->assertSee('Delete tenant?')
+        ->assertSee('data-tenant-archive', false)
+        ->assertSee('Archive tenant account?')
         ->assertSee('name="_method" value="DELETE"', false)
         ->assertSee('Add a tenant')
         ->assertSee('action="'.route('admin.tenant.store').'"', false)
@@ -203,7 +203,7 @@ test('tenant update rejects a mismatched record id', function () {
     ]);
 });
 
-test('admin can delete an unassigned tenant and its invitation while preserving its application', function () {
+test('admin can archive a tenant while preserving its application and invitation history', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $tenant = User::factory()->create(['role' => 'tenant']);
     $application = Application::query()->create([
@@ -211,8 +211,8 @@ test('admin can delete an unassigned tenant and its invitation while preserving 
         'email' => $tenant->email,
         'phone' => '555-0133',
         'move_in_date' => '2026-10-01',
-        'user_id' => $tenant->id,
     ]);
+    $application->forceFill(['user_id' => $tenant->id])->save();
     $invitation = TenantAccountInvitation::query()->create([
         'user_id' => $tenant->id,
         'issued_by' => $admin->id,
@@ -223,18 +223,23 @@ test('admin can delete an unassigned tenant and its invitation while preserving 
     $this->actingAs($admin)
         ->delete(route('admin.tenant.destroy', $tenant))
         ->assertRedirectToRoute('admin.tenant.index')
-        ->assertSessionHas('success', 'Tenant deleted.');
+        ->assertSessionHas('success', 'Tenant archived. Room assignment and account history have been preserved.');
 
-    $this->assertDatabaseMissing('users', ['id' => $tenant->id]);
-    $this->assertDatabaseMissing('tenant_account_invitations', ['id' => $invitation->id]);
+    $this->assertSoftDeleted('users', ['id' => $tenant->id]);
+    $this->assertDatabaseHas('tenant_account_invitations', ['id' => $invitation->id]);
     $this->assertDatabaseHas('applications', [
         'id' => $application->id,
-        'user_id' => null,
+        'user_id' => $tenant->id,
         'applicant_name' => $tenant->name,
     ]);
+
+    $this->get(route('admin.tenant.index'))
+        ->assertSee('Archived accounts')
+        ->assertSee($tenant->email)
+        ->assertSee('Restore account');
 });
 
-test('admin cannot delete a tenant with room assignment history', function () {
+test('admin can archive a tenant with ended room assignment history', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $tenant = User::factory()->create(['role' => 'tenant']);
     $room = Room::query()->create([
@@ -253,9 +258,66 @@ test('admin cannot delete a tenant with room assignment history', function () {
     $this->actingAs($admin)
         ->delete(route('admin.tenant.destroy', $tenant))
         ->assertRedirectToRoute('admin.tenant.index')
-        ->assertSessionHas('error', 'This tenant has room assignment history and cannot be deleted.');
+        ->assertSessionHas('success', 'Tenant archived. Room assignment and account history have been preserved.');
 
-    $this->assertDatabaseHas('users', ['id' => $tenant->id]);
+    $this->assertSoftDeleted('users', ['id' => $tenant->id]);
+    $this->assertDatabaseHas('room_assignments', [
+        'user_id' => $tenant->id,
+        'status' => 'ended',
+    ]);
+});
+
+test('admin cannot archive a tenant with an active room assignment', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R403',
+        'capacity' => 1,
+        'monthly_rent' => 3500,
+    ]);
+    RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'status' => 'occupied',
+        'start_date' => '2026-06-01',
+    ]);
+
+    $this->actingAs($admin)
+        ->delete(route('admin.tenant.destroy', $tenant))
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('error', 'This tenant still has an active or reserved room assignment. End or cancel it before archiving this account.');
+
+    $this->assertModelExists($tenant);
+    $this->assertDatabaseHas('room_assignments', [
+        'user_id' => $tenant->id,
+        'status' => 'occupied',
+    ]);
+});
+
+test('admin can restore an archived tenant account', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $tenant->delete();
+
+    $this->actingAs($admin)
+        ->patch(route('admin.tenant.restore', $tenant->id))
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('success', 'Tenant account restored.');
+
+    $this->assertModelExists($tenant);
+});
+
+test('archived tenant accounts cannot sign in', function () {
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $tenant->delete();
+
+    $this->post(route('login'), [
+        'email' => $tenant->email,
+        'password' => 'password',
+        'login_role' => 'tenant',
+    ])->assertSessionHasErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ]);
 });
 
 test('guest is redirected when accessing tenant administration', function () {
@@ -301,6 +363,9 @@ test('tenant cannot access tenant administration actions', function () {
     ])->assertForbidden();
 
     $this->delete(route('admin.tenant.destroy', $otherTenant))
+        ->assertForbidden();
+
+    $this->patch(route('admin.tenant.restore', $otherTenant->id))
         ->assertForbidden();
 
     $this->assertDatabaseHas('users', [
