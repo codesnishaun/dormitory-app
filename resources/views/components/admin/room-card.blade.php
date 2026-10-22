@@ -31,7 +31,7 @@
             </div>
             <div class="col-span-2">
                 <dt class="text-xs text-inkSoft">Submeter</dt>
-                <dd class="mt-1 font-mono text-xs font-medium text-ink">{{ $room->submeter_number ?? 'Not assigned' }}</dd>
+                <dd class="mt-1 font-mono text-xs font-medium text-ink">{{ $room->currentMeterAssignment?->submeter?->meter_number ?? 'Not assigned' }}</dd>
             </div>
         </dl>
 

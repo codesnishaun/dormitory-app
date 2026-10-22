@@ -53,10 +53,10 @@ $variants = [
             ? 'text-copper bg-paper/[0.06] border-copper/10'
             : 'text-paper/75 bg-transparent border-transparent hover:text-copper hover:bg-paper/[0.06] hover:border-copper/30'),
 
-    'sidebar' => 'w-full justify-start! whitespace-nowrap rounded-xl! px-4 py-2.5 text-sm font-medium! transition-colors ' .
+    'sidebar' => 'group w-full justify-start! whitespace-nowrap rounded-xl! border-l-2 border-y-0 border-r-0 px-3.5 py-3 text-sm font-medium! transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper [&>svg]:transition-colors ' .
         ($active
-            ? 'bg-copper text-paper'
-            : 'text-paper/70 hover:bg-paper/10 hover:text-paper'),
+            ? 'border-l-copper bg-paper/10 text-paper shadow-sm [&>svg]:text-copper'
+            : 'border-l-transparent text-paper/70 hover:border-l-paper/25 hover:bg-paper/[0.06] hover:text-paper [&>svg]:text-paper/50 group-hover:[&>svg]:text-copper'),
 
     'primary'   => 'bg-copper text-white hover:bg-copperDeep hover:-translate-y-px hover:text-paper',
     'secondary' => 'bg-paper/[0.08] text-paper border border-paper/[0.18] backdrop-blur-sm hover:bg-paper/[0.16] hover:border-paper/30',
