@@ -9,6 +9,8 @@ use LogicException;
 
 class ElectricityBill extends Model
 {
+    public const ALLOCATION_METHOD_OCCUPANCY_DAYS = 'occupancy_days_largest_remainder_v1';
+
     protected static function booted(): void
     {
         static::updating(function (self $bill): never {
@@ -25,6 +27,8 @@ class ElectricityBill extends Model
         'period_start',
         'period_end',
         'rate_per_kwh',
+        'cost_source',
+        'allocation_method',
         'total_kwh',
         'total_amount',
         'preview_token_hash',
