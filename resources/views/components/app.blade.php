@@ -90,7 +90,7 @@
         <div class="flex min-h-0 flex-1 flex-col md:flex-row">
 
             {{-- Sidebar --}}
-            <aside class="relative z-10 flex w-full shrink-0 flex-col border-b border-paper/10 bg-gradient-to-b from-ink to-[#1D2D24] px-4 py-3 shadow-lg md:min-h-0 md:w-72 md:overflow-y-auto md:border-b-0 md:border-r md:border-paper/10 md:px-5 md:py-6">
+            <aside class="relative z-10 flex max-h-dvh w-full shrink-0 flex-col overflow-y-auto overscroll-contain border-b border-paper/10 bg-gradient-to-b from-ink to-[#1D2D24] px-4 py-3 shadow-lg md:min-h-0 md:max-h-none md:w-72 md:border-b-0 md:border-r md:border-paper/10 md:px-5 md:py-6">
                 <a href="{{ route('home') }}" class="mb-3 flex items-center gap-3 md:mb-7">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[conic-gradient(#C1712F_0deg_260deg,rgba(246,238,221,.18)_260deg_360deg)]">
                         <span class="h-[22px] w-[22px] rounded-full bg-ink"></span>
