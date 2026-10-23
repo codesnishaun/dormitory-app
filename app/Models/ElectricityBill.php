@@ -27,7 +27,6 @@ class ElectricityBill extends Model
         'rate_per_kwh',
         'total_kwh',
         'total_amount',
-        'preview_token_hash',
         'finalized_by',
         'finalized_at',
     ];

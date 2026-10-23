@@ -120,7 +120,9 @@
                     <label
                         for="sidebar-menu-toggle"
                         class="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-paper/10 bg-paper/[0.04] px-3.5 py-2.5 text-sm font-semibold text-paper/85 transition hover:bg-paper/[0.08] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-copper peer-checked:[&_.menu-label]:hidden peer-checked:[&_.close-label]:inline peer-checked:[&_.menu-icon]:hidden peer-checked:[&_.close-icon]:block md:hidden"
+                        class="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-paper/10 bg-paper/[0.04] px-3.5 py-2.5 text-sm font-semibold text-paper/85 transition hover:bg-paper/[0.08] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-copper peer-checked:[&_.menu-label]:hidden peer-checked:[&_.close-label]:inline peer-checked:[&_.menu-icon]:hidden peer-checked:[&_.close-icon]:block md:hidden"
                     >
+                        <span class="menu-label">Navigation</span>
                         <span class="menu-label">Navigation</span>
                         <span class="close-label hidden">Close</span>
                         <x-svg-icon name="menu" class="menu-icon h-5 w-5" />
@@ -130,6 +132,7 @@
                     <div id="sidebar-navigation" class="hidden flex-col gap-3 border-t border-paper/10 pt-4 peer-checked:flex md:flex md:flex-1 md:border-t-0 md:pt-0">
                         <nav
                             aria-label="{{ ucfirst($navigation) }} navigation"
+                            class="flex min-h-0 flex-1 flex-col gap-1.5"
                             class="flex min-h-0 flex-1 flex-col gap-1.5"
                         >
                             {{ $sidebar }}
