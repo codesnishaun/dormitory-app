@@ -46,7 +46,10 @@
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <h3 class="text-sm font-semibold">{{ $bill->room->room_number }} · {{ $bill->period_start->format('M j, Y') }} – {{ $bill->period_end->format('M j, Y') }}</h3>
-                                <p class="mt-1 text-xs text-inkSoft">{{ number_format((float) $bill->total_kwh, 3) }} kWh at ₱{{ number_format((float) $bill->rate_per_kwh, 4) }}/kWh</p>
+                                <p class="mt-1 text-xs text-inkSoft">
+                                    {{ number_format((float) $bill->total_kwh, 3) }} kWh ·
+                                    {{ $bill->cost_source === 'provider_bill' ? 'Actual room utility-bill cost' : 'Estimated at ₱'.number_format((float) $bill->rate_per_kwh, 4).'/kWh' }}
+                                </p>
                             </div>
                             <div class="text-left sm:text-right">
                                 <p class="font-mono text-lg font-bold text-teal">₱{{ number_format((float) $allocation->allocated_amount, 2) }}</p>
