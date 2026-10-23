@@ -90,7 +90,7 @@
         <div class="flex min-h-0 flex-1 flex-col md:flex-row">
 
             {{-- Sidebar --}}
-            <aside class="relative z-10 flex w-full shrink-0 flex-col border-b border-paper/10 bg-gradient-to-b from-ink to-[#1D2D24] px-4 py-3 shadow-lg md:min-h-0 md:w-72 md:overflow-y-auto md:border-b-0 md:border-r md:border-paper/10 md:px-5 md:py-6">
+            <aside class="relative z-10 flex max-h-dvh w-full shrink-0 flex-col overflow-y-auto overscroll-contain border-b border-paper/10 bg-gradient-to-b from-ink to-[#1D2D24] px-4 py-3 shadow-lg md:min-h-0 md:max-h-none md:w-72 md:border-b-0 md:border-r md:border-paper/10 md:px-5 md:py-6">
                 <a href="{{ route('home') }}" class="mb-3 flex items-center gap-3 md:mb-7">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[conic-gradient(#C1712F_0deg_260deg,rgba(246,238,221,.18)_260deg_360deg)]">
                         <span class="h-[22px] w-[22px] rounded-full bg-ink"></span>
@@ -120,7 +120,9 @@
                     <label
                         for="sidebar-menu-toggle"
                         class="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-paper/10 bg-paper/[0.04] px-3.5 py-2.5 text-sm font-semibold text-paper/85 transition hover:bg-paper/[0.08] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-copper peer-checked:[&_.menu-label]:hidden peer-checked:[&_.close-label]:inline peer-checked:[&_.menu-icon]:hidden peer-checked:[&_.close-icon]:block md:hidden"
+                        class="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-paper/10 bg-paper/[0.04] px-3.5 py-2.5 text-sm font-semibold text-paper/85 transition hover:bg-paper/[0.08] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-copper peer-checked:[&_.menu-label]:hidden peer-checked:[&_.close-label]:inline peer-checked:[&_.menu-icon]:hidden peer-checked:[&_.close-icon]:block md:hidden"
                     >
+                        <span class="menu-label">Navigation</span>
                         <span class="menu-label">Navigation</span>
                         <span class="close-label hidden">Close</span>
                         <x-svg-icon name="menu" class="menu-icon h-5 w-5" />
@@ -130,6 +132,7 @@
                     <div id="sidebar-navigation" class="hidden flex-col gap-3 border-t border-paper/10 pt-4 peer-checked:flex md:flex md:flex-1 md:border-t-0 md:pt-0">
                         <nav
                             aria-label="{{ ucfirst($navigation) }} navigation"
+                            class="flex min-h-0 flex-1 flex-col gap-1.5"
                             class="flex min-h-0 flex-1 flex-col gap-1.5"
                         >
                             {{ $sidebar }}
