@@ -18,6 +18,22 @@ class MeterReading extends Model
 
     protected static function booted(): void
     {
+        static::updating(function (self $reading): void {
+            if ($reading->isLockedByFinalizedBill()) {
+                throw ValidationException::withMessages([
+                    'reading_date' => 'Meter readings used by a finalized electricity bill cannot be changed.',
+                ]);
+            }
+        });
+
+        static::deleting(function (self $reading): void {
+            if ($reading->isLockedByFinalizedBill()) {
+                throw ValidationException::withMessages([
+                    'reading_date' => 'Meter readings used by a finalized electricity bill cannot be deleted.',
+                ]);
+            }
+        });
+
         static::creating(function (self $reading): void {
             $assignment = MeterAssignment::query()
                 ->with('submeter')
@@ -81,6 +97,33 @@ class MeterReading extends Model
             'reading_date' => 'date',
             'reading_value' => 'decimal:3',
         ];
+    }
+
+    private function isLockedByFinalizedBill(): bool
+    {
+        $readingId = $this->getKey();
+        $originalAssignmentId = (int) $this->getRawOriginal('meter_assignment_id');
+        $originalReadingDate = (string) $this->getRawOriginal('reading_date');
+        $assignmentId = (int) $this->meter_assignment_id;
+        $readingDate = $this->reading_date->toDateString();
+
+        return ElectricityBillSegment::query()
+            ->where(function ($query) use ($readingId): void {
+                $query->where('opening_reading_id', $readingId)
+                    ->orWhere('closing_reading_id', $readingId);
+            })
+            ->exists()
+            || $this->isInsideFinalizedSegment($originalAssignmentId, $originalReadingDate)
+            || $this->isInsideFinalizedSegment($assignmentId, $readingDate);
+    }
+
+    private function isInsideFinalizedSegment(int $meterAssignmentId, string $readingDate): bool
+    {
+        return ElectricityBillSegment::query()
+            ->where('meter_assignment_id', $meterAssignmentId)
+            ->whereDate('segment_start', '<=', $readingDate)
+            ->whereDate('segment_end', '>=', $readingDate)
+            ->exists();
     }
 
     public function meterAssignment(): BelongsTo
