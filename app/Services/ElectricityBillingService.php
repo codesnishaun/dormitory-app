@@ -8,12 +8,16 @@ use App\Models\Room;
 use App\Models\RoomAssignment;
 use App\Models\Transaction;
 use App\Models\User;
+use Brick\Math\BigDecimal;
+use Brick\Math\BigInteger;
+use Brick\Math\RoundingMode;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use LogicException;
 
 class ElectricityBillingService
 {
@@ -22,10 +26,14 @@ class ElectricityBillingService
      *     room: Room,
      *     period_start: CarbonImmutable,
      *     period_end: CarbonImmutable,
-     *     rate_per_kwh: string,
-     *     total_kwh: float,
-     *     total_amount: float,
+     *     rate_per_kwh: ?string,
+     *     cost_source: string,
+     *     allocation_method: string,
+     *     total_kwh: string,
+     *     total_amount: string,
      *     total_person_days: int,
+     *     allocated_total: string,
+     *     reconciles: bool,
      *     segments: array<int, array<string, mixed>>,
      *     allocations: array<int, array<string, mixed>>
      * }
@@ -34,20 +42,22 @@ class ElectricityBillingService
         Room $room,
         CarbonImmutable $periodStart,
         CarbonImmutable $periodEnd,
-        string $ratePerKwh,
+        ?string $ratePerKwh,
+        ?string $actualRoomCost,
     ): array {
-        return $this->buildPreview($room, $periodStart, $periodEnd, $ratePerKwh);
+        return $this->buildPreview($room, $periodStart, $periodEnd, $ratePerKwh, $actualRoomCost);
     }
 
     public function finalize(
         Room $room,
         CarbonImmutable $periodStart,
         CarbonImmutable $periodEnd,
-        string $ratePerKwh,
+        ?string $ratePerKwh,
+        ?string $actualRoomCost,
         User $admin,
         string $previewTokenHash,
     ): ElectricityBill {
-        return DB::transaction(function () use ($room, $periodStart, $periodEnd, $ratePerKwh, $admin, $previewTokenHash): ElectricityBill {
+        return DB::transaction(function () use ($room, $periodStart, $periodEnd, $ratePerKwh, $actualRoomCost, $admin, $previewTokenHash): ElectricityBill {
             $lockedRoom = Room::query()->lockForUpdate()->findOrFail($room->id);
 
             $existingBill = ElectricityBill::query()
@@ -60,7 +70,9 @@ class ElectricityBillingService
                     $existingBill->room_id !== $lockedRoom->id
                     || ! $existingBill->period_start->isSameDay($periodStart)
                     || ! $existingBill->period_end->isSameDay($periodEnd)
-                    || (string) $existingBill->rate_per_kwh !== $ratePerKwh
+                    || (string) ($existingBill->rate_per_kwh ?? '') !== (string) ($ratePerKwh ?? '')
+                    || $existingBill->cost_source !== ($actualRoomCost === null ? 'meter_rate' : 'provider_bill')
+                    || ($actualRoomCost !== null && (string) $existingBill->total_amount !== $actualRoomCost)
                 ) {
                     throw ValidationException::withMessages([
                         'preview_token' => 'This preview token has already been used for a different billing cycle.',
@@ -70,15 +82,17 @@ class ElectricityBillingService
                 return $existingBill->load(['room', 'segments', 'allocations']);
             }
 
-            $preview = $this->buildPreview($lockedRoom, $periodStart, $periodEnd, $ratePerKwh, true);
+            $preview = $this->buildPreview($lockedRoom, $periodStart, $periodEnd, $ratePerKwh, $actualRoomCost, true);
 
             $bill = ElectricityBill::query()->create([
                 'room_id' => $lockedRoom->id,
                 'period_start' => $periodStart->toDateString(),
                 'period_end' => $periodEnd->toDateString(),
                 'rate_per_kwh' => $ratePerKwh,
-                'total_kwh' => number_format($preview['total_kwh'], 3, '.', ''),
-                'total_amount' => number_format($preview['total_amount'], 2, '.', ''),
+                'cost_source' => $preview['cost_source'],
+                'allocation_method' => $preview['allocation_method'],
+                'total_kwh' => $preview['total_kwh'],
+                'total_amount' => $preview['total_amount'],
                 'preview_token_hash' => $previewTokenHash,
                 'finalized_by' => $admin->id,
                 'finalized_at' => now(),
@@ -95,7 +109,7 @@ class ElectricityBillingService
                     'user_id' => $allocation['user_id'],
                     'type' => 'charge',
                     'description' => 'Electricity bill for '.$lockedRoom->room_number,
-                    'amount' => number_format($allocation['allocated_amount'], 2, '.', ''),
+                    'amount' => $allocation['allocated_amount'],
                     'transaction_date' => today(),
                     'due_date' => null,
                     'notes' => sprintf(
@@ -122,10 +136,14 @@ class ElectricityBillingService
      *     room: Room,
      *     period_start: CarbonImmutable,
      *     period_end: CarbonImmutable,
-     *     rate_per_kwh: string,
-     *     total_kwh: float,
-     *     total_amount: float,
+     *     rate_per_kwh: ?string,
+     *     cost_source: string,
+     *     allocation_method: string,
+     *     total_kwh: string,
+     *     total_amount: string,
      *     total_person_days: int,
+     *     allocated_total: string,
+     *     reconciles: bool,
      *     segments: array<int, array<string, mixed>>,
      *     allocations: array<int, array<string, mixed>>
      * }
@@ -134,9 +152,16 @@ class ElectricityBillingService
         Room $room,
         CarbonImmutable $periodStart,
         CarbonImmutable $periodEnd,
-        string $ratePerKwh,
+        ?string $ratePerKwh,
+        ?string $actualRoomCost,
         bool $lockRows = false,
     ): array {
+        if (($ratePerKwh === null) === ($actualRoomCost === null)) {
+            throw ValidationException::withMessages([
+                'actual_cost' => 'Provide either an actual room utility-bill amount or a per-kWh tariff, but not both.',
+            ]);
+        }
+
         $overlappingBillQuery = ElectricityBill::query()
             ->where('room_id', $room->id)
             ->whereDate('period_start', '<=', $periodEnd->toDateString())
@@ -176,7 +201,7 @@ class ElectricityBillingService
 
         $segments = [];
         $cursor = $periodStart;
-        $totalKwh = 0.0;
+        $totalKwh = BigDecimal::zero();
 
         foreach ($assignments as $assignment) {
             $segmentStart = CarbonImmutable::parse($assignment->installed_at)
@@ -230,14 +255,17 @@ class ElectricityBillingService
                 ]);
             }
 
-            $consumption = round(
-                (float) $closingReading->reading_value - (float) $openingReading->reading_value,
-                3,
-            );
+            $consumption = BigDecimal::of($closingReading->reading_value)
+                ->minus($openingReading->reading_value)
+                ->toScale(3);
 
-            if ($consumption < 0) {
+            if (
+                BigDecimal::of($openingReading->reading_value)->compareTo(0) < 0
+                || BigDecimal::of($closingReading->reading_value)->compareTo(0) < 0
+                || $consumption->compareTo(0) < 0
+            ) {
                 throw ValidationException::withMessages([
-                    'period_end' => 'A closing meter reading cannot be lower than its opening reading.',
+                    'period_end' => 'Meter readings must be non-negative and a closing reading cannot be lower than its opening reading.',
                 ]);
             }
 
@@ -250,10 +278,10 @@ class ElectricityBillingService
                 'segment_end' => $segmentEnd->toDateString(),
                 'opening_reading' => $openingReading->reading_value,
                 'closing_reading' => $closingReading->reading_value,
-                'consumption_kwh' => number_format($consumption, 3, '.', ''),
+                'consumption_kwh' => (string) $consumption,
             ];
 
-            $totalKwh += $consumption;
+            $totalKwh = $totalKwh->plus($consumption);
             $cursor = $segmentEnd->addDay();
         }
 
@@ -263,22 +291,28 @@ class ElectricityBillingService
             ]);
         }
 
-        $totalKwh = round($totalKwh, 3);
-        $totalAmount = round($totalKwh * (float) $ratePerKwh, 2);
+        $totalKwh = $totalKwh->toScale(3);
+        $totalAmount = $actualRoomCost === null
+            ? $totalKwh->multipliedBy($ratePerKwh)->toScale(2, RoundingMode::HalfUp)
+            : BigDecimal::of($actualRoomCost)->toScale(2);
 
-        if ($totalAmount > 99999999.99) {
+        if ($totalAmount->compareTo('99999999.99') > 0) {
             throw ValidationException::withMessages([
-                'rate_per_kwh' => 'The calculated bill exceeds the maximum supported amount.',
+                $actualRoomCost === null ? 'rate_per_kwh' : 'actual_cost' => 'The room electricity cost exceeds the maximum supported amount.',
             ]);
         }
 
         $roomAssignmentsQuery = RoomAssignment::query()
-            ->with(['user', 'absenceRequests' => fn (HasMany $query) => $query
-                ->where('status', 'approved')
-                ->whereDate('start_date', '<=', $periodEnd->toDateString())
-                ->whereDate('end_date', '>=', $periodStart->toDateString())])
+            ->with(['user', 'absenceRequests' => function (HasMany $query) use ($periodStart, $periodEnd, $lockRows): void {
+                $query->whereDate('start_date', '<=', $periodEnd->toDateString())
+                    ->whereDate('end_date', '>=', $periodStart->toDateString());
+
+                if ($lockRows) {
+                    $query->lockForUpdate();
+                }
+            }])
             ->where('room_id', $room->id)
-            ->whereIn('status', ['reserved', 'occupied'])
+            ->whereIn('status', ['reserved', 'occupied', 'ended'])
             ->whereDate('start_date', '<=', $periodEnd->toDateString())
             ->where(function (Builder $query) use ($periodStart): void {
                 $query->whereNull('end_date')
@@ -299,6 +333,12 @@ class ElectricityBillingService
                 continue;
             }
 
+            if ($roomAssignment->status === 'ended' && $roomAssignment->end_date === null) {
+                throw ValidationException::withMessages([
+                    'room_id' => 'An ended tenant room assignment is missing its move-out date.',
+                ]);
+            }
+
             $activeStart = CarbonImmutable::parse($roomAssignment->start_date)
                 ->greaterThan($periodStart)
                     ? CarbonImmutable::parse($roomAssignment->start_date)
@@ -315,21 +355,23 @@ class ElectricityBillingService
             }
 
             $calendarDays = (int) $activeStart->diffInDays($activeEnd) + 1;
-            $approvedAbsenceDays = $this->countApprovedAbsenceDays(
+            $absenceSnapshots = $this->approvedAbsenceSnapshots(
                 $roomAssignment->absenceRequests,
                 $activeStart,
                 $activeEnd,
             );
+            $approvedAbsenceDays = $this->countApprovedAbsenceDays($absenceSnapshots);
             $chargeableDays = max($calendarDays - $approvedAbsenceDays, 0);
-
-            if ($chargeableDays === 0) {
-                continue;
-            }
 
             $allocationInputs[] = [
                 'room_assignment_id' => $roomAssignment->id,
                 'user_id' => $roomAssignment->user_id,
                 'tenant_name' => $roomAssignment->user->name,
+                'assignment_start_date' => $roomAssignment->start_date->toDateString(),
+                'assignment_end_date' => $roomAssignment->end_date?->toDateString(),
+                'eligible_days' => $calendarDays,
+                'approved_absence_days' => $approvedAbsenceDays,
+                'absence_snapshots' => $absenceSnapshots,
                 'chargeable_days' => $chargeableDays,
             ];
             $totalPersonDays += $chargeableDays;
@@ -341,31 +383,53 @@ class ElectricityBillingService
             ]);
         }
 
-        $totalCents = (int) round($totalAmount * 100);
-        $remainingCents = $totalCents;
+        $totalCents = $totalAmount->multipliedBy(100)->toInt();
+        $baseAllocations = [];
+        $remainders = [];
+        $allocatedBaseCents = 0;
+
+        foreach ($allocationInputs as $index => $allocation) {
+            [$baseCents, $remainder] = BigInteger::of($totalCents)
+                ->multipliedBy($allocation['chargeable_days'])
+                ->quotientAndRemainder($totalPersonDays);
+            $baseAllocations[$index] = $baseCents->toInt();
+            $remainders[$index] = $remainder;
+            $allocatedBaseCents += $baseAllocations[$index];
+        }
+
+        $remainingCents = $totalCents - $allocatedBaseCents;
+        if ($remainingCents < 0 || $remainingCents >= count($allocationInputs)) {
+            throw new LogicException('The electricity allocation rounding remainder is outside the expected range.');
+        }
+
+        $remainderOrder = array_keys($allocationInputs);
+        usort($remainderOrder, function (int $left, int $right) use ($remainders, $allocationInputs): int {
+            $remainderComparison = $remainders[$right]->compareTo($remainders[$left]);
+
+            return $remainderComparison !== 0
+                ? $remainderComparison
+                : $allocationInputs[$left]['room_assignment_id'] <=> $allocationInputs[$right]['room_assignment_id'];
+        });
+
+        $roundingAdjustments = array_fill(0, count($allocationInputs), 0);
+        for ($index = 0; $index < $remainingCents; $index++) {
+            $roundingAdjustments[$remainderOrder[$index]] = 1;
+        }
+
         $allocations = [];
-        $roundedAllocations = [];
+        $allocatedCentsTotal = 0;
 
         foreach ($allocationInputs as $index => $allocation) {
-            $allocatedCents = intdiv(
-                $totalCents * $allocation['chargeable_days'],
-                $totalPersonDays,
-            );
-            $remainingCents -= $allocatedCents;
-            $roundedAllocations[$index] = $allocatedCents;
-        }
-
-        foreach ($roundedAllocations as $index => $allocatedCents) {
-            if ($remainingCents > 0) {
-                $roundedAllocations[$index]++;
-                $remainingCents--;
-            }
-        }
-
-        foreach ($allocationInputs as $index => $allocation) {
+            $allocatedCents = $baseAllocations[$index] + $roundingAdjustments[$index];
+            $allocatedCentsTotal += $allocatedCents;
             $allocations[] = $allocation + [
-                'allocated_amount' => $roundedAllocations[$index] / 100,
+                'allocated_amount' => $this->formatCents($allocatedCents),
+                'rounding_adjustment_cents' => $roundingAdjustments[$index],
             ];
+        }
+
+        if ($allocatedCentsTotal !== $totalCents) {
+            throw new LogicException('Tenant electricity allocations do not reconcile with the room cost.');
         }
 
         return [
@@ -373,9 +437,13 @@ class ElectricityBillingService
             'period_start' => $periodStart,
             'period_end' => $periodEnd,
             'rate_per_kwh' => $ratePerKwh,
-            'total_kwh' => $totalKwh,
-            'total_amount' => $totalAmount,
+            'cost_source' => $actualRoomCost === null ? 'meter_rate' : 'provider_bill',
+            'allocation_method' => ElectricityBill::ALLOCATION_METHOD_OCCUPANCY_DAYS,
+            'total_kwh' => (string) $totalKwh,
+            'total_amount' => (string) $totalAmount,
             'total_person_days' => $totalPersonDays,
+            'allocated_total' => $this->formatCents($allocatedCentsTotal),
+            'reconciles' => $allocatedCentsTotal === $totalCents,
             'segments' => $segments,
             'allocations' => $allocations,
         ];
@@ -383,22 +451,61 @@ class ElectricityBillingService
 
     /**
      * @param  Collection<int, AbsenceRequest>  $absenceRequests
+     * @return array<int, array{
+     *     absence_request_id: int,
+     *     requested_start_date: string,
+     *     requested_end_date: string,
+     *     eligible_start_date: string,
+     *     eligible_end_date: string
+     * }>
      */
-    private function countApprovedAbsenceDays(
+    private function approvedAbsenceSnapshots(
         Collection $absenceRequests,
         CarbonImmutable $activeStart,
         CarbonImmutable $activeEnd,
-    ): int {
-        $absenceRanges = $absenceRequests
-            ->map(function (AbsenceRequest $absenceRequest) use ($activeStart, $activeEnd): array {
+    ): array {
+        return $absenceRequests
+            ->filter(fn (AbsenceRequest $absenceRequest): bool => $absenceRequest->status === AbsenceRequest::STATUS_APPROVED)
+            ->map(function (AbsenceRequest $absenceRequest) use ($activeStart, $activeEnd): ?array {
                 $startDate = CarbonImmutable::parse($absenceRequest->start_date);
                 $endDate = CarbonImmutable::parse($absenceRequest->end_date);
-                $startDate = $startDate->greaterThan($activeStart) ? $startDate : $activeStart;
-                $endDate = $endDate->lessThan($activeEnd) ? $endDate : $activeEnd;
+                $eligibleStartDate = $startDate->greaterThan($activeStart) ? $startDate : $activeStart;
+                $eligibleEndDate = $endDate->lessThan($activeEnd) ? $endDate : $activeEnd;
 
-                return [$startDate, $endDate];
+                if ($eligibleStartDate->greaterThan($eligibleEndDate)) {
+                    return null;
+                }
+
+                return [
+                    'absence_request_id' => $absenceRequest->id,
+                    'requested_start_date' => $startDate->toDateString(),
+                    'requested_end_date' => $endDate->toDateString(),
+                    'eligible_start_date' => $eligibleStartDate->toDateString(),
+                    'eligible_end_date' => $eligibleEndDate->toDateString(),
+                ];
             })
-            ->filter(fn (array $range): bool => $range[0]->lessThanOrEqualTo($range[1]))
+            ->filter()
+            ->sortBy('eligible_start_date')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @param  array<int, array{
+     *     absence_request_id: int,
+     *     requested_start_date: string,
+     *     requested_end_date: string,
+     *     eligible_start_date: string,
+     *     eligible_end_date: string
+     * }>  $absenceSnapshots
+     */
+    private function countApprovedAbsenceDays(array $absenceSnapshots): int
+    {
+        $absenceRanges = collect($absenceSnapshots)
+            ->map(fn (array $snapshot): array => [
+                CarbonImmutable::parse($snapshot['eligible_start_date']),
+                CarbonImmutable::parse($snapshot['eligible_end_date']),
+            ])
             ->sortBy(fn (array $range): string => $range[0]->toDateString())
             ->values();
 
@@ -430,5 +537,10 @@ class ElectricityBillingService
         }
 
         return $totalAbsenceDays;
+    }
+
+    private function formatCents(int $cents): string
+    {
+        return intdiv($cents, 100).'.'.str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
     }
 }
