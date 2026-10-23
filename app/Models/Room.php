@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Room extends Model
 {
@@ -18,5 +19,18 @@ class Room extends Model
     public function roomAssignments(): HasMany
     {
         return $this->hasMany(RoomAssignment::class);
+    }
+
+    public function meterAssignments(): HasMany
+    {
+        return $this->hasMany(MeterAssignment::class);
+    }
+
+    public function currentMeterAssignment(): HasOne
+    {
+        return $this->hasOne(MeterAssignment::class)
+            ->whereNull('uninstalled_at')
+            ->latest('installed_at')
+            ->latest('id');
     }
 }

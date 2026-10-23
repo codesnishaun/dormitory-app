@@ -90,8 +90,8 @@
         <div class="flex min-h-0 flex-1 flex-col md:flex-row">
 
             {{-- Sidebar --}}
-            <aside class="relative z-10 flex w-full shrink-0 flex-col border-b border-paper/10 bg-ink px-4 py-3 md:min-h-0 md:w-70 md:overflow-y-auto md:border-b-0 md:border-r md:px-5 md:py-5">
-                <a href="{{ route('home') }}" class="mb-3 flex items-center gap-2.5 md:mb-6">
+            <aside class="relative z-10 flex w-full shrink-0 flex-col border-b border-paper/10 bg-gradient-to-b from-ink to-[#1D2D24] px-4 py-3 shadow-lg md:min-h-0 md:w-72 md:overflow-y-auto md:border-b-0 md:border-r md:border-paper/10 md:px-5 md:py-6">
+                <a href="{{ route('home') }}" class="mb-3 flex items-center gap-3 md:mb-7">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[conic-gradient(#C1712F_0deg_260deg,rgba(246,238,221,.18)_260deg_360deg)]">
                         <span class="h-[22px] w-[22px] rounded-full bg-ink"></span>
                     </span>
@@ -105,6 +105,9 @@
                             B&A Dormitory
                         </span>
                     </span>
+                    <span class="ml-auto hidden rounded-full border border-paper/10 bg-paper/[0.06] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-paper/55 md:inline-flex">
+                        {{ $navigation === 'admin' ? 'Admin' : 'Resident' }}
+                    </span>
                 </a>
 
                 <div class="flex flex-col md:flex-1">
@@ -116,9 +119,9 @@
                     >
                     <label
                         for="sidebar-menu-toggle"
-                        class="flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-paper/80 hover:bg-paper/10 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-copper peer-checked:[&_.menu-label]:hidden peer-checked:[&_.close-label]:inline peer-checked:[&_.menu-icon]:hidden peer-checked:[&_.close-icon]:block md:hidden"
+                        class="flex min-h-11 cursor-pointer items-center justify-between gap-3 rounded-xl border border-paper/10 bg-paper/[0.04] px-3.5 py-2.5 text-sm font-semibold text-paper/85 transition hover:bg-paper/[0.08] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-copper peer-checked:[&_.menu-label]:hidden peer-checked:[&_.close-label]:inline peer-checked:[&_.menu-icon]:hidden peer-checked:[&_.close-icon]:block md:hidden"
                     >
-                        <span class="menu-label">Menu</span>
+                        <span class="menu-label">Navigation</span>
                         <span class="close-label hidden">Close</span>
                         <x-svg-icon name="menu" class="menu-icon h-5 w-5" />
                         <x-svg-icon name="close" class="close-icon hidden h-5 w-5" />
@@ -127,7 +130,7 @@
                     <div id="sidebar-navigation" class="hidden flex-col gap-3 border-t border-paper/10 pt-4 peer-checked:flex md:flex md:flex-1 md:border-t-0 md:pt-0">
                         <nav
                             aria-label="{{ ucfirst($navigation) }} navigation"
-                            class="flex min-h-0 flex-1 flex-col gap-2"
+                            class="flex min-h-0 flex-1 flex-col gap-1.5"
                         >
                             {{ $sidebar }}
                         </nav>
