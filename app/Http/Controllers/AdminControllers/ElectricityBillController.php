@@ -64,6 +64,7 @@ class ElectricityBillController extends Controller
             CarbonImmutable::parse($data['period_end']),
             (string) $data['rate_per_kwh'],
             $request->user(),
+            hash('sha256', $request->user()->id.':'.$validatedToken),
         );
 
         $request->session()->forget($previewKey);
