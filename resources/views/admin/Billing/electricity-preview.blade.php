@@ -13,7 +13,13 @@
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div class="rounded-xl border border-ink/8 bg-paper3 p-4"><p class="text-xs text-inkSoft">Usage</p><p class="mt-1 font-mono text-xl font-bold">{{ number_format($preview['total_kwh'], 3) }} kWh</p></div>
-            <div class="rounded-xl border border-ink/8 bg-paper3 p-4"><p class="text-xs text-inkSoft">Tariff</p><p class="mt-1 font-mono text-xl font-bold">₱{{ number_format((float) $preview['rate_per_kwh'], 4) }}/kWh</p></div>
+            <div class="rounded-xl border border-ink/8 bg-paper3 p-4">
+                <p class="text-xs text-inkSoft">Cost source</p>
+                <p class="mt-1 text-sm font-bold">{{ $preview['cost_source'] === 'provider_bill' ? 'Actual room utility-bill amount' : 'Explicit tariff estimate' }}</p>
+                @if ($preview['rate_per_kwh'] !== null)
+                    <p class="mt-1 font-mono text-xs text-inkSoft">₱{{ number_format((float) $preview['rate_per_kwh'], 4) }}/kWh</p>
+                @endif
+            </div>
             <div class="rounded-xl border border-ink/8 bg-paper3 p-4"><p class="text-xs text-inkSoft">Person-days</p><p class="mt-1 font-mono text-xl font-bold">{{ number_format($preview['total_person_days']) }}</p></div>
             <div class="rounded-xl border border-teal/20 bg-teal/5 p-4"><p class="text-xs text-inkSoft">Total bill</p><p class="mt-1 font-mono text-xl font-bold text-teal">₱{{ number_format($preview['total_amount'], 2) }}</p></div>
         </div>
@@ -51,16 +57,44 @@
         <section class="overflow-hidden rounded-2xl border border-ink/8 bg-paper3" aria-labelledby="tenant-allocations-heading">
             <div class="border-b border-ink/8 px-5 py-4">
                 <h2 id="tenant-allocations-heading" class="font-display text-lg font-bold">Tenant allocation</h2>
-                <p class="mt-1 text-xs text-inkSoft">Charge is shared by chargeable person-days; approved absences are excluded.</p>
+                <p class="mt-1 text-xs text-inkSoft">Room cost × tenant chargeable days ÷ total chargeable person-days. Approved overlapping absence dates are deducted once.</p>
+                <p class="mt-1 text-xs text-inkSoft">Allocation method: {{ $preview['allocation_method'] }}; leftover cents go to the largest fractional remainders, with assignment ID as the tie-break.</p>
             </div>
-            <div class="divide-y divide-ink/8">
-                @foreach ($preview['allocations'] as $allocation)
-                    <div class="flex items-center justify-between gap-4 px-5 py-3">
-                        <div><p class="text-sm font-semibold">{{ $allocation['tenant_name'] }}</p><p class="text-xs text-inkSoft">{{ number_format($allocation['chargeable_days']) }} chargeable days</p></div>
-                        <p class="font-mono text-sm font-semibold">₱{{ number_format($allocation['allocated_amount'], 2) }}</p>
-                    </div>
-                @endforeach
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[48rem] text-left text-sm">
+                    <thead class="bg-paper/60 text-[10px] uppercase tracking-wider text-inkSoft">
+                        <tr><th class="px-5 py-3">Tenant / assignment</th><th class="px-5 py-3 text-right">Eligible days</th><th class="px-5 py-3 text-right">Approved absence days</th><th class="px-5 py-3 text-right">Chargeable days</th><th class="px-5 py-3 text-right">Electricity charge</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-ink/8">
+                        @foreach ($preview['allocations'] as $allocation)
+                            <tr>
+                                <td class="px-5 py-3">
+                                    <p class="font-semibold">{{ $allocation['tenant_name'] }}</p>
+                                    <p class="text-xs text-inkSoft">{{ $allocation['assignment_start_date'] }} – {{ $allocation['assignment_end_date'] ?? 'Ongoing' }}</p>
+                                    @foreach ($allocation['absence_snapshots'] as $absence)
+                                        <p class="mt-1 text-xs text-inkSoft">Approved absence #{{ $absence['absence_request_id'] }}: {{ $absence['requested_start_date'] }}–{{ $absence['requested_end_date'] }} (eligible overlap {{ $absence['eligible_start_date'] }}–{{ $absence['eligible_end_date'] }})</p>
+                                    @endforeach
+                                </td>
+                                <td class="px-5 py-3 text-right font-mono">{{ number_format($allocation['eligible_days']) }}</td>
+                                <td class="px-5 py-3 text-right font-mono">{{ number_format($allocation['approved_absence_days']) }}</td>
+                                <td class="px-5 py-3 text-right font-mono">{{ number_format($allocation['chargeable_days']) }}</td>
+                                <td class="px-5 py-3 text-right">
+                                    <p class="font-mono font-semibold">₱{{ number_format((float) $allocation['allocated_amount'], 2) }}</p>
+                                    @if ($allocation['rounding_adjustment_cents'] > 0)
+                                        <p class="text-xs text-inkSoft">Rounding adjustment +{{ $allocation['rounding_adjustment_cents'] }} cent</p>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot class="border-t border-ink/10 bg-paper/40">
+                        <tr><th colspan="4" class="px-5 py-3 text-right">Allocated total</th><td class="px-5 py-3 text-right font-mono font-bold">₱{{ number_format((float) $preview['allocated_total'], 2) }}</td></tr>
+                    </tfoot>
+                </table>
             </div>
+            <p class="border-t border-ink/8 px-5 py-3 text-sm font-semibold {{ $preview['reconciles'] ? 'text-success' : 'text-red-700' }}" role="status">
+                {{ $preview['reconciles'] ? 'Tenant charges reconcile exactly with the room cost.' : 'Tenant charges do not reconcile with the room cost; do not finalize.' }}
+            </p>
         </section>
 
         <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -70,7 +104,8 @@
                 <input type="hidden" name="room_id" value="{{ $preview['room']->id }}">
                 <input type="hidden" name="period_start" value="{{ $preview['period_start']->toDateString() }}">
                 <input type="hidden" name="period_end" value="{{ $preview['period_end']->toDateString() }}">
-                <input type="hidden" name="rate_per_kwh" value="{{ $preview['rate_per_kwh'] }}">
+                <input type="hidden" name="rate_per_kwh" value="{{ $preview['rate_per_kwh'] ?? '' }}">
+                <input type="hidden" name="actual_cost" value="{{ $preview['cost_source'] === 'provider_bill' ? $preview['total_amount'] : '' }}">
                 <input type="hidden" name="preview_token" value="{{ $token }}">
                 <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-teal px-5 text-sm font-semibold text-white transition hover:bg-tealDeep sm:w-auto">Finalize bill and create charges</button>
             </form>
