@@ -391,11 +391,18 @@ test('bill preview and finalization allocate only approved absence-adjusted pers
 
     $bill = ElectricityBill::query()->sole();
 
+    $this->withSession([
+        'electricity_bill_previews' => [$previewToken => $cycle],
+    ])->post(route('admin.electricity-bills.finalize'), $cycle + [
+        'preview_token' => $previewToken,
+    ])->assertRedirectToRoute('admin.electricity-bills.show', $bill);
+
     $this->assertDatabaseHas('electricity_bills', [
         'id' => $bill->id,
         'total_kwh' => '50.000',
         'rate_per_kwh' => '15.0615',
         'total_amount' => '753.08',
+        'preview_token_hash' => hash('sha256', $admin->id.':'.$previewToken),
     ]);
     $this->assertDatabaseHas('electricity_bill_allocations', [
         'electricity_bill_id' => $bill->id,

@@ -45,9 +45,31 @@ class ElectricityBillingService
         CarbonImmutable $periodEnd,
         string $ratePerKwh,
         User $admin,
+        string $previewTokenHash,
     ): ElectricityBill {
-        return DB::transaction(function () use ($room, $periodStart, $periodEnd, $ratePerKwh, $admin): ElectricityBill {
+        return DB::transaction(function () use ($room, $periodStart, $periodEnd, $ratePerKwh, $admin, $previewTokenHash): ElectricityBill {
             $lockedRoom = Room::query()->lockForUpdate()->findOrFail($room->id);
+
+            $existingBill = ElectricityBill::query()
+                ->where('preview_token_hash', $previewTokenHash)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingBill !== null) {
+                if (
+                    $existingBill->room_id !== $lockedRoom->id
+                    || ! $existingBill->period_start->isSameDay($periodStart)
+                    || ! $existingBill->period_end->isSameDay($periodEnd)
+                    || (string) $existingBill->rate_per_kwh !== $ratePerKwh
+                ) {
+                    throw ValidationException::withMessages([
+                        'preview_token' => 'This preview token has already been used for a different billing cycle.',
+                    ]);
+                }
+
+                return $existingBill->load(['room', 'segments', 'allocations']);
+            }
+
             $preview = $this->buildPreview($lockedRoom, $periodStart, $periodEnd, $ratePerKwh, true);
 
             $bill = ElectricityBill::query()->create([
@@ -57,6 +79,7 @@ class ElectricityBillingService
                 'rate_per_kwh' => $ratePerKwh,
                 'total_kwh' => number_format($preview['total_kwh'], 3, '.', ''),
                 'total_amount' => number_format($preview['total_amount'], 2, '.', ''),
+                'preview_token_hash' => $previewTokenHash,
                 'finalized_by' => $admin->id,
                 'finalized_at' => now(),
             ]);
