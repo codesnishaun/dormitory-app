@@ -6,7 +6,7 @@
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.16em] text-teal">Submeter billing</p>
                 <h1 class="mt-2 font-display text-3xl font-bold text-ink">Electricity bills</h1>
-                <p class="mt-2 text-sm text-inkSoft">Preview meter consumption and person-day allocations before finalizing charges.</p>
+                <p class="mt-2 text-sm text-inkSoft">Preview meter consumption and occupancy-day allocations before finalizing charges.</p>
             </div>
             <a href="{{ route('admin.meter-assignments.index') }}" class="text-sm font-semibold text-teal hover:text-tealDeep">Manage meter assignments</a>
         </header>
@@ -27,7 +27,7 @@
 
         <section class="rounded-2xl border border-ink/8 bg-paper3 p-5 shadow-sm sm:p-6" aria-labelledby="preview-electricity-heading">
             <h2 id="preview-electricity-heading" class="font-display text-xl font-bold text-ink">Prepare a billing cycle</h2>
-            <p class="mt-1 text-sm text-inkSoft">Each room is billed separately. Meter readings are required at every assignment segment boundary.</p>
+            <p class="mt-1 text-sm text-inkSoft">Each room is billed separately. Meter readings are required at every assignment segment boundary. Enter the actual room utility-bill total or an explicit tariff estimate.</p>
 
             <form method="POST" action="{{ route('admin.electricity-bills.preview') }}" class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 @csrf
@@ -49,9 +49,14 @@
                     <input type="date" name="period_end" value="{{ old('period_end', today()->toDateString()) }}" max="{{ today()->toDateString() }}" required class="mt-1.5 h-11 w-full rounded-xl border border-ink/10 bg-white px-3 text-sm">
                 </label>
                 <label class="block text-sm font-medium text-ink">
-                    Tariff (per kWh)
-                    <input type="number" name="rate_per_kwh" value="{{ old('rate_per_kwh', '15.0615') }}" min="0.0001" max="999999.9999" step="0.0001" required class="mt-1.5 h-11 w-full rounded-xl border border-ink/10 bg-white px-3 text-sm">
-                    <span class="mt-1 block text-xs font-normal text-inkSoft">Suggested rate: ₱15.0615/kWh. Editable each cycle.</span>
+                    Actual room utility-bill total (₱)
+                    <input type="number" name="actual_cost" value="{{ old('actual_cost') }}" min="0" max="99999999.99" step="0.01" class="mt-1.5 h-11 w-full rounded-xl border border-ink/10 bg-white px-3 text-sm">
+                    <span class="mt-1 block text-xs font-normal text-inkSoft">Use the provider's actual room cost when available. Enter this OR an explicit tariff estimate.</span>
+                </label>
+                <label class="block text-sm font-medium text-ink">
+                    Estimated tariff (₱/kWh)
+                    <input type="number" name="rate_per_kwh" value="{{ old('rate_per_kwh') }}" min="0.0001" max="999999.9999" step="0.0001" class="mt-1.5 h-11 w-full rounded-xl border border-ink/10 bg-white px-3 text-sm">
+                    <span class="mt-1 block text-xs font-normal text-inkSoft">Required only when an actual room utility-bill total is not supplied. No tariff is preselected.</span>
                 </label>
                 <div class="sm:col-span-2 xl:col-span-4">
                     <button type="submit" @disabled($rooms->isEmpty()) class="inline-flex h-11 items-center justify-center rounded-xl bg-teal px-5 text-sm font-semibold text-white transition hover:bg-tealDeep disabled:cursor-not-allowed disabled:opacity-50">Preview bill</button>
@@ -72,7 +77,7 @@
                     <a href="{{ route('admin.electricity-bills.show', $bill) }}" class="flex flex-col gap-2 px-5 py-4 transition hover:bg-paper/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <span>
                             <span class="block text-sm font-semibold text-ink">{{ $bill->room->room_number }} · {{ $bill->period_start->format('M j, Y') }} – {{ $bill->period_end->format('M j, Y') }}</span>
-                            <span class="mt-1 block text-xs text-inkSoft">{{ number_format((float) $bill->total_kwh, 3) }} kWh · ₱{{ number_format((float) $bill->rate_per_kwh, 4) }}/kWh · Finalized {{ $bill->finalized_at->format('M j, Y') }}</span>
+                            <span class="mt-1 block text-xs text-inkSoft">{{ number_format((float) $bill->total_kwh, 3) }} kWh · {{ $bill->cost_source === 'provider_bill' ? 'Actual room utility-bill cost' : 'Estimated at ₱'.number_format((float) $bill->rate_per_kwh, 4).'/kWh' }} · Finalized {{ $bill->finalized_at->format('M j, Y') }}</span>
                         </span>
                         <span class="flex items-center gap-3">
                             <span class="font-mono text-sm font-semibold text-ink">₱{{ number_format((float) $bill->total_amount, 2) }}</span>

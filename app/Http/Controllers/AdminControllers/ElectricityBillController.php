@@ -4,8 +4,10 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\ElectricityBill;
+use App\Models\ElectricityBillAllocation;
 use App\Models\Room;
 use App\Services\ElectricityBillingService;
+use Brick\Math\BigDecimal;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +37,8 @@ class ElectricityBillController extends Controller
             $room,
             CarbonImmutable::parse($data['period_start']),
             CarbonImmutable::parse($data['period_end']),
-            (string) $data['rate_per_kwh'],
+            $data['rate_per_kwh'],
+            $data['actual_cost'],
         );
         $token = Str::random(48);
         $request->session()->put('electricity_bill_previews.'.$token, $data);
@@ -62,7 +65,8 @@ class ElectricityBillController extends Controller
             Room::query()->findOrFail($data['room_id']),
             CarbonImmutable::parse($data['period_start']),
             CarbonImmutable::parse($data['period_end']),
-            (string) $data['rate_per_kwh'],
+            $data['rate_per_kwh'],
+            $data['actual_cost'],
             $request->user(),
             hash('sha256', $request->user()->id.':'.$validatedToken),
         );
@@ -83,11 +87,30 @@ class ElectricityBillController extends Controller
             'allocations.transaction',
         ]);
 
-        return view('admin.Billing.electricity-show', ['bill' => $electricityBill]);
+        $allocatedCents = $electricityBill->allocations->sum(
+            fn (ElectricityBillAllocation $allocation): int => BigDecimal::of($allocation->allocated_amount)
+                ->multipliedBy(100)
+                ->toInt(),
+        );
+        $billCents = BigDecimal::of($electricityBill->total_amount)
+            ->multipliedBy(100)
+            ->toInt();
+
+        return view('admin.Billing.electricity-show', [
+            'bill' => $electricityBill,
+            'allocatedTotal' => $this->formatCents($allocatedCents),
+            'reconciles' => $allocatedCents === $billCents,
+        ]);
     }
 
     /**
-     * @return array{room_id: int, period_start: string, period_end: string, rate_per_kwh: string}
+     * @return array{
+     *     room_id: int,
+     *     period_start: string,
+     *     period_end: string,
+     *     rate_per_kwh: ?string,
+     *     actual_cost: ?string
+     * }
      */
     private function validatedCycle(Request $request): array
     {
@@ -95,14 +118,25 @@ class ElectricityBillController extends Controller
             'room_id' => ['required', 'integer', 'exists:rooms,id'],
             'period_start' => ['required', 'date', 'before_or_equal:period_end'],
             'period_end' => ['required', 'date', 'before_or_equal:today'],
-            'rate_per_kwh' => ['required', 'numeric', 'gt:0', 'max:999999.9999', 'decimal:0,4'],
+            'actual_cost' => ['nullable', 'required_without:rate_per_kwh', 'prohibits:rate_per_kwh', 'numeric', 'min:0', 'max:99999999.99', 'decimal:0,2'],
+            'rate_per_kwh' => ['nullable', 'required_without:actual_cost', 'numeric', 'gt:0', 'max:999999.9999', 'decimal:0,4'],
         ]);
 
         return [
             'room_id' => (int) $data['room_id'],
             'period_start' => CarbonImmutable::parse($data['period_start'])->toDateString(),
             'period_end' => CarbonImmutable::parse($data['period_end'])->toDateString(),
-            'rate_per_kwh' => number_format((float) $data['rate_per_kwh'], 4, '.', ''),
+            'rate_per_kwh' => isset($data['rate_per_kwh'])
+                ? (string) BigDecimal::of($data['rate_per_kwh'])->toScale(4)
+                : null,
+            'actual_cost' => isset($data['actual_cost'])
+                ? (string) BigDecimal::of($data['actual_cost'])->toScale(2)
+                : null,
         ];
+    }
+
+    private function formatCents(int $cents): string
+    {
+        return intdiv($cents, 100).'.'.str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
     }
 }

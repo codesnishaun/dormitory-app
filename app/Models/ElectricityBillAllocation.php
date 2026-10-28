@@ -24,7 +24,13 @@ class ElectricityBillAllocation extends Model
         'room_assignment_id',
         'user_id',
         'tenant_name',
+        'assignment_start_date',
+        'assignment_end_date',
+        'eligible_days',
+        'approved_absence_days',
+        'absence_snapshots',
         'chargeable_days',
+        'rounding_adjustment_cents',
         'allocated_amount',
         'transaction_id',
     ];
@@ -32,7 +38,13 @@ class ElectricityBillAllocation extends Model
     protected function casts(): array
     {
         return [
+            'assignment_start_date' => 'date',
+            'assignment_end_date' => 'date',
+            'eligible_days' => 'integer',
+            'approved_absence_days' => 'integer',
+            'absence_snapshots' => 'array',
             'chargeable_days' => 'integer',
+            'rounding_adjustment_cents' => 'integer',
             'allocated_amount' => 'decimal:2',
         ];
     }
