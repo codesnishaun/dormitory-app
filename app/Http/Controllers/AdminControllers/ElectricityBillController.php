@@ -26,7 +26,7 @@ class ElectricityBillController extends Controller
             ->latest('id')
             ->paginate(15);
 
-        return view('admin.Billing.electricity', compact('rooms', 'bills'));
+        return view('admin.billing.electricity', compact('rooms', 'bills'));
     }
 
     public function preview(Request $request, ElectricityBillingService $billing): View
@@ -43,7 +43,7 @@ class ElectricityBillController extends Controller
         $token = Str::random(48);
         $request->session()->put('electricity_bill_previews.'.$token, $data);
 
-        return view('admin.Billing.electricity-preview', compact('preview', 'token'));
+        return view('admin.billing.electricity-preview', compact('preview', 'token'));
     }
 
     public function finalize(Request $request, ElectricityBillingService $billing): RedirectResponse
@@ -96,7 +96,7 @@ class ElectricityBillController extends Controller
             ->multipliedBy(100)
             ->toInt();
 
-        return view('admin.Billing.electricity-show', [
+        return view('admin.billing.electricity-show', [
             'bill' => $electricityBill,
             'allocatedTotal' => $this->formatCents($allocatedCents),
             'reconciles' => $allocatedCents === $billCents,
