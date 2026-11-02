@@ -4,7 +4,7 @@
 ])
 
 <!DOCTYPE html>
-<html lang="en" class="{{ $navigation !== 'guest' ? 'h-full overflow-hidden' : '' }}">
+<html lang="en" class="{{ $navigation !== 'guest' && $navigation !== 'none' ? 'h-full overflow-hidden' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,7 +85,7 @@
             <div>© 2026 DORA — Dormitory Online Response Assistant, B&A Dormitory.</div>
             <div>San Ildefonso, Bulacan · Prototype system</div>
         </footer>
-    @else
+    @elseif ($navigation !== 'none')
     <div class="flex h-dvh min-h-0 flex-col overflow-hidden">
         <div class="flex min-h-0 flex-1 flex-col md:flex-row">
 
@@ -149,6 +149,8 @@
         </div>
 
     </div>
+    @else
+        {{ $slot }}
     @endif
 </body>
 </html>
