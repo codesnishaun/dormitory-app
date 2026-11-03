@@ -1,7 +1,7 @@
 <x-tenant-layout body-class="min-h-screen font-sans text-ink">
     <x-slot:title>Announcements - DORA</x-slot:title>
 
-    <x-header title="Announcements" description="Notices from Byron & Aaron Dormitory management."/>
+    <x-header title="Announcements" description="Notices from Bryan & Aaron Dormitory management."/>
 
     <x-tenant-panel>
         <div class="flex flex-col gap-3">
