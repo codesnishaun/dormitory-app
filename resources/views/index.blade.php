@@ -18,7 +18,7 @@
                 </h1>
 
                 <p class="mt-6 max-w-[48ch] text-base leading-relaxed text-paper/70 sm:text-lg">
-                    Welcome to Cozy Haven. Find your room, stay on top of bills, and get help with the little things that make a place feel like home.
+                    Welcome to Bryan & Aaron Dormitory. Find your room, stay on top of bills, and get help with the little things that make a place feel like home.
                 </p>
 
                 <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -56,7 +56,7 @@
                     <div
                         id="location"
                         class="relative h-[20rem] w-full overflow-hidden rounded-[1.25rem] bg-paper2 sm:h-[22rem"
-                        aria-label="Illustrated neighborhood map showing Cozy Haven in San Ildefonso, Bulacan"
+                        aria-label="Illustrated neighborhood map showing Bryan & Aaron Dormitory in San Ildefonso, Bulacan"
                     > 
                         <span class="absolute left-5 top-5 rounded-full border border-white/70 bg-paper3/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-inkSoft backdrop-blur sm:left-7 sm:top-7">
                             Location preview
@@ -86,7 +86,7 @@
             <div class="mb-9 max-w-2xl sm:mb-12">
                 <div class="mb-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-copperDeep">
                     <span class="h-1.5 w-1.5 rounded-full bg-copper"></span>
-                    The Cozy Haven experience
+                    The Bryan & Aaron Dormitory experience
                 </div>
                 <h2 class="font-display text-[clamp(1.9rem,3.5vw,3rem)] font-medium leading-tight tracking-tight text-ink">
                     The details of home, <em class="text-teal">all in one place.</em>
@@ -135,7 +135,7 @@
             <div class="mt-10 flex flex-col gap-5 rounded-3xl bg-ink px-6 py-7 text-paper sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-8">
                 <div>
                     <p class="font-display text-xl font-semibold sm:text-2xl">Ready to find your place?</p>
-                    <p class="mt-1.5 text-sm leading-relaxed text-paper/65">Take the first step toward making Cozy Haven home.</p>
+                    <p class="mt-1.5 text-sm leading-relaxed text-paper/65">Take the first step toward making Bryan & Aaron Dormitory home.</p>
                 </div>
                 <x-button :href="route('application_form')" class="w-full shrink-0 sm:w-auto">
                     Start your application
