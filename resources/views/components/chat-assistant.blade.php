@@ -20,7 +20,7 @@
                 </span>
                 <div>
                     <h2 class="font-display text-lg font-bold leading-tight text-ink">DORA Assistant</h2>
-                    <p class="mt-0.5 text-xs text-inkSoft">{{ $audience }} support · Cozy Haven</p>
+                    <p class="mt-0.5 text-xs text-inkSoft">{{ $audience }} support · Byron & Aaron Dormitory</p>
                 </div>
             </div>
 

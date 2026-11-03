@@ -25,7 +25,7 @@
             <div class="relative z-10 mt-8 max-w-lg lg:my-auto lg:py-12">
                 <p class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-paper/75">
                     <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-copper"></span>
-                    Cozy Haven Dormitory
+                    Byron & Aaron Dormitory Dormitory
                 </p>
                 <h1 id="brand-heading" class="mt-3 max-w-[13ch] font-display text-3xl font-medium leading-[1.08] tracking-tight text-paper sm:text-4xl lg:text-6xl">
                     A better way to <span class="text-copper">feel at home.</span>
@@ -64,7 +64,7 @@
                         Secure account access
                     </p>
                     <h2 id="login-heading" class="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">Welcome back</h2>
-                    <p class="mt-2 text-sm leading-relaxed text-inkSoft">Sign in to your Cozy Haven account and pick up where you left off.</p>
+                    <p class="mt-2 text-sm leading-relaxed text-inkSoft">Sign in to your Byron & Aaron Dormitory account and pick up where you left off.</p>
                 </div>
 
                 @if (session('status'))
@@ -194,7 +194,7 @@
                 </form>
 
                 <p class="mt-6 border-t border-ink/10 pt-5 text-center text-xs leading-relaxed text-inkSoft/75">
-                    Use the email address linked to your Cozy Haven account.
+                    Use the email address linked to your Byron & Aaron Dormitory account.
                 </p>
             </div>
         </section>
