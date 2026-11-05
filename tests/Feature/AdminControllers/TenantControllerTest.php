@@ -52,8 +52,221 @@ test('admin tenant index shows tenant records and their room assignment from the
         ->assertSee('Archive tenant account?')
         ->assertSee('name="_method" value="DELETE"', false)
         ->assertSee('Add a tenant')
+        ->assertDontSee('Mark as Occupied')
         ->assertSee('action="'.route('admin.tenant.store').'"', false)
         ->assertSee('add-tenant-modal', false);
+});
+
+test('room confirmation keeps an approved applicant reserved until move-in', function () {
+    Mail::fake();
+    $admin = User::factory()->create(['role' => 'admin']);
+    $room = Room::query()->create([
+        'room_number' => 'R409',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'available',
+    ]);
+    $application = Application::query()->create([
+        'applicant_name' => 'Reserved Applicant',
+        'email' => 'reserved@example.test',
+        'phone' => '555-0409',
+        'preferred_room_id' => $room->id,
+        'move_in_date' => today()->toDateString(),
+    ]);
+    $application->forceFill([
+        'status' => 'approved',
+        'reviewed_by' => $admin->id,
+        'reviewed_at' => now(),
+    ])->save();
+
+    $this->actingAs($admin)
+        ->post(route('applications.assign-room', $application), ['room_id' => $room->id])
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('success', 'Room confirmed and invitation sent.');
+
+    $assignment = RoomAssignment::query()->sole();
+    $tenant = $assignment->user;
+
+    expect($assignment->status)->toBe('reserved');
+    $this->assertDatabaseHas('rooms', [
+        'id' => $room->id,
+        'status' => 'reserved',
+    ]);
+    $this->assertDatabaseHas('tenant_account_invitations', [
+        'user_id' => $tenant->id,
+        'issued_by' => $admin->id,
+    ]);
+
+    $this->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('aria-label="Occupied rooms: 0 of 1"', false);
+});
+
+test('admin can move a tenant with a completed setup from reserved to occupied', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R404',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'reserved',
+    ]);
+    $assignment = RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'status' => 'reserved',
+        'start_date' => today()->subDay()->toDateString(),
+    ]);
+    TenantAccountInvitation::query()->create([
+        'user_id' => $tenant->id,
+        'issued_by' => $admin->id,
+        'token_hash' => hash('sha256', 'move-in-completed-setup'),
+        'expires_at' => now()->addHour(),
+        'used_at' => now(),
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.tenant.index'))
+        ->assertOk()
+        ->assertSee('Mark as Occupied')
+        ->assertSee('Mark '.$tenant->name.' in room R404 as occupied?');
+
+    $this->actingAs($admin)
+        ->patch(route('admin.tenant.move-in', [$tenant, $assignment]))
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('success', "{$tenant->name} has moved into room R404.");
+
+    $this->assertDatabaseHas('room_assignments', [
+        'id' => $assignment->id,
+        'status' => 'occupied',
+        'start_date' => $assignment->start_date->toDateString(),
+    ]);
+    $this->assertDatabaseHas('rooms', [
+        'id' => $room->id,
+        'status' => 'occupied',
+    ]);
+
+    $this->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSee('aria-label="Occupied rooms: 1 of 1"', false);
+});
+
+test('tenant cannot mark a room assignment occupied', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R405',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'reserved',
+    ]);
+    $assignment = RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'status' => 'reserved',
+        'start_date' => today()->toDateString(),
+    ]);
+    TenantAccountInvitation::query()->create([
+        'user_id' => $tenant->id,
+        'issued_by' => $admin->id,
+        'token_hash' => hash('sha256', 'move-in-tenant-setup'),
+        'expires_at' => now()->addHour(),
+        'used_at' => now(),
+    ]);
+
+    $this->actingAs($tenant)
+        ->patch(route('admin.tenant.move-in', [$tenant, $assignment]))
+        ->assertForbidden();
+
+    $this->assertDatabaseHas('room_assignments', [
+        'id' => $assignment->id,
+        'status' => 'reserved',
+    ]);
+});
+
+test('admin cannot move in an assignment owned by another tenant', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $otherTenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R406',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'reserved',
+    ]);
+    $assignment = RoomAssignment::query()->create([
+        'user_id' => $otherTenant->id,
+        'room_id' => $room->id,
+        'status' => 'reserved',
+        'start_date' => today()->toDateString(),
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.tenant.move-in', [$tenant, $assignment]))
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('room_assignments', [
+        'id' => $assignment->id,
+        'user_id' => $otherTenant->id,
+        'status' => 'reserved',
+    ]);
+});
+
+test('admin cannot move in an occupied or nonexistent assignment', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R407',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'occupied',
+    ]);
+    $assignment = RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'status' => 'occupied',
+        'start_date' => today()->toDateString(),
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.tenant.move-in', [$tenant, $assignment]))
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('error', 'Only reserved assignments for tenants who completed account setup can be marked occupied.');
+
+    $this->patch(route('admin.tenant.move-in', [$tenant, 999999]))
+        ->assertNotFound();
+
+    $this->assertDatabaseHas('room_assignments', [
+        'id' => $assignment->id,
+        'status' => 'occupied',
+    ]);
+});
+
+test('admin cannot move in a reserved assignment before account setup is complete', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $tenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R408',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'reserved',
+    ]);
+    $assignment = RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'status' => 'reserved',
+        'start_date' => today()->toDateString(),
+    ]);
+
+    $this->actingAs($admin)
+        ->patch(route('admin.tenant.move-in', [$tenant, $assignment]))
+        ->assertRedirectToRoute('admin.tenant.index')
+        ->assertSessionHas('error', 'Only reserved assignments for tenants who completed account setup can be marked occupied.');
+
+    $this->assertDatabaseHas('room_assignments', [
+        'id' => $assignment->id,
+        'status' => 'reserved',
+    ]);
 });
 
 test('admin can add a tenant account and send its setup invitation', function () {

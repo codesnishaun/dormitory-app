@@ -28,6 +28,7 @@ class TenantController extends Controller
                     ->with(['room', 'application'])
                     ->orderByDesc('start_date')
                     ->orderByDesc('id'),
+                'tenantAccountInvitations' => fn ($query) => $query->whereNotNull('used_at'),
             ])
             ->orderBy('name')
             ->paginate(15);
@@ -107,6 +108,45 @@ class TenantController extends Controller
         return redirect()
             ->route('admin.tenant.index')
             ->with('success', 'Tenant updated.');
+    }
+
+    public function moveIn(User $tenant, RoomAssignment $roomAssignment): RedirectResponse
+    {
+        abort_unless($tenant->role === 'tenant', 404);
+
+        $movedIn = DB::transaction(function () use ($tenant, $roomAssignment): bool {
+            $assignment = RoomAssignment::query()
+                ->whereKey($roomAssignment->id)
+                ->where('user_id', $tenant->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if (
+                $assignment->status !== 'reserved'
+                || ! $tenant->tenantAccountInvitations()->whereNotNull('used_at')->exists()
+            ) {
+                return false;
+            }
+
+            $room = Room::query()
+                ->lockForUpdate()
+                ->findOrFail($assignment->room_id);
+
+            $assignment->update(['status' => 'occupied']);
+            $room->update(['status' => 'occupied']);
+
+            return true;
+        });
+
+        if (! $movedIn) {
+            return redirect()
+                ->route('admin.tenant.index')
+                ->with('error', 'Only reserved assignments for tenants who completed account setup can be marked occupied.');
+        }
+
+        return redirect()
+            ->route('admin.tenant.index')
+            ->with('success', "{$tenant->name} has moved into room {$roomAssignment->room->room_number}.");
     }
 
     public function destroy(User $tenant): RedirectResponse
