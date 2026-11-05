@@ -16,8 +16,17 @@ class HomeController extends Controller
         $totalRooms = Room::count();
         $openRooms = Room::where('status', 'available')->count();
         $tenantCount = User::where('role', 'tenant')->count();
+        $dormitoryLocation = config('dormitory');
+        $dormitoryCoordinatesConfigured = $dormitoryLocation['latitude'] !== null
+            && $dormitoryLocation['longitude'] !== null;
 
-        return view('index', compact('totalRooms', 'openRooms', 'tenantCount'));
+        return view('index', compact(
+            'totalRooms',
+            'openRooms',
+            'tenantCount',
+            'dormitoryLocation',
+            'dormitoryCoordinatesConfigured',
+        ));
     }
 
     /**
