@@ -20,9 +20,28 @@
     --color-success:    #4C7A50;
     --color-danger:     #B33F3F;
 
-    --font-display: "Fraunces", serif;
-    --font-sans: "Inter", sans-serif;
+    --font-display: Georgia, "Times New Roman", serif;
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", monospace;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 .dormitory-marker {
