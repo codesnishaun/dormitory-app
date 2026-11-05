@@ -22,6 +22,7 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
     Route::get('/admin/tenants', [TenantController::class, 'index'])->name('admin.tenant.index');
     Route::post('/admin/tenants', [TenantController::class, 'store'])->name('admin.tenant.store');
     Route::put('/admin/tenants/{tenant}', [TenantController::class, 'update'])->name('admin.tenant.update');
+    Route::patch('/admin/tenants/{tenant}/assignments/{roomAssignment}/move-in', [TenantController::class, 'moveIn'])->name('admin.tenant.move-in');
     Route::delete('/admin/tenants/{tenant}', [TenantController::class, 'destroy'])->name('admin.tenant.destroy');
     Route::patch('/admin/tenants/{tenant}/restore', [TenantController::class, 'restore'])->name('admin.tenant.restore');
 
