@@ -149,5 +149,6 @@
     @else
         {{ $slot }}
     @endif
+    @stack('scripts')
 </body>
 </html>

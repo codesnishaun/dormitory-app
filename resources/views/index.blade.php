@@ -51,30 +51,88 @@
                 <div class="absolute -right-4 -top-5 h-24 w-24 rounded-full bg-copper/20 blur-2xl sm:-right-6 sm:-top-7"></div>
                 <div class="absolute -bottom-5 -left-4 h-28 w-28 rounded-full bg-teal/30 blur-2xl sm:-bottom-7 sm:-left-6"></div>
 
-                {{-- Map Card --}}
                 <div class="relative rounded-[1.75rem] border border-paper/15 bg-paper3 p-3 shadow-2xl shadow-black/20 sm:p-4">
                     <div
                         id="location"
-                        class="relative h-[20rem] w-full overflow-hidden rounded-[1.25rem] bg-paper2 sm:h-[22rem"
-                        aria-label="Illustrated neighborhood map showing Bryan & Aaron Dormitory in San Ildefonso, Bulacan"
-                    > 
-                        <span class="absolute left-5 top-5 rounded-full border border-white/70 bg-paper3/90 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-inkSoft backdrop-blur sm:left-7 sm:top-7">
-                            Location preview
-                        </span>
-                        <span class="absolute bottom-5 right-5 rounded-full bg-paper3/90 px-3 py-1.5 text-[11px] font-medium text-inkSoft backdrop-blur sm:bottom-7 sm:right-7">
-                            San Ildefonso, Bulacan
-                        </span>
-                    </div>
+                        data-dormitory-location
+                        data-latitude="{{ $dormitoryLocation['latitude'] ?? '' }}"
+                        data-longitude="{{ $dormitoryLocation['longitude'] ?? '' }}"
+                        data-name="{{ $dormitoryLocation['name'] }}"
+                        data-address="{{ $dormitoryLocation['address'] }}"
+                        class="relative h-[20rem] w-full overflow-hidden rounded-[1.25rem] bg-paper2 sm:h-[24rem] lg:h-[27rem]"
+                    >
+                        <div
+                            id="dormitory-map"
+                            class="absolute inset-0 z-0"
+                            role="region"
+                            aria-label="Interactive map showing {{ $dormitoryLocation['name'] }} in {{ $dormitoryLocation['address'] }}"
+                        ></div>
 
-                    <div class="flex flex-col gap-4 px-2 pb-1 pt-4 sm:flex-row sm:items-center sm:justify-between sm:px-3 sm:pt-5">
-                        <div>
-                            <p class="font-display text-lg font-semibold text-ink">Room to settle in.</p>
-                            <p class="mt-1 text-sm text-inkSoft">A welcoming place, with the essentials close at hand.</p>
+                        <div
+                            id="map-fallback"
+                            class="absolute inset-0 z-[500] flex flex-col items-center justify-center gap-3 bg-paper2 px-6 text-center"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            <span class="grid h-12 w-12 place-items-center rounded-full bg-ink text-2xl text-copper" aria-hidden="true">⌂</span>
+                            @if ($dormitoryCoordinatesConfigured)
+                                <span class="max-w-sm text-sm font-medium leading-relaxed text-inkSoft">
+                                    Loading the interactive location map. If it does not appear, use the Google Maps option below.
+                                </span>
+                            @else
+                                <span class="max-w-sm text-sm font-medium leading-relaxed text-inkSoft">
+                                    The interactive map is waiting for verified dormitory coordinates. No approximate marker is shown.
+                                </span>
+                            @endif
                         </div>
-                        <a href="#features" class="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-tealDeep hover:text-copperDeep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal">
-                            More Information
-                            <span aria-hidden="true">↓</span>
-                        </a>
+                    </div>
+                    <p id="map-status" class="px-2 pt-2 text-xs text-inkSoft" aria-live="polite"></p>
+
+                    <div class="flex flex-col gap-4 px-2 pb-1 pt-4 sm:px-3 sm:pt-5">
+                        <div>
+                            <p class="font-display text-lg font-semibold text-ink">{{ $dormitoryLocation['name'] }}</p>
+                            <p class="mt-1 text-sm text-inkSoft">{{ $dormitoryLocation['address'] }}</p>
+                        </div>
+                        <div class="flex flex-col gap-3 border-t border-paper2 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="max-w-sm">
+                                <p class="text-sm leading-relaxed text-inkSoft">
+                                    Your location is requested only when you choose Get Directions. It is used to open Google Maps and is never stored or sent to DORA.
+                                </p>
+                                @unless ($dormitoryCoordinatesConfigured)
+                                    <p class="mt-2 text-xs font-medium leading-relaxed text-copperDeep">
+                                        Automatic directions are unavailable until the dormitory coordinates are verified. Confirm the destination before starting a manual route.
+                                    </p>
+                                @endunless
+                            </div>
+                            <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+                                <button
+                                    id="get-directions"
+                                    type="button"
+                                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-copper px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-copperDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal disabled:cursor-wait disabled:opacity-70"
+                                    aria-describedby="directions-status"
+                                >
+                                    <svg data-loading-indicator class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                    <span data-directions-label>Get Directions</span>
+                                </button>
+                                <a
+                                    href="https://www.google.com/maps/dir/?api=1&amp;destination={{ urlencode($dormitoryLocation['name'].', '.$dormitoryLocation['address']) }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-tealDeep transition hover:bg-teal/10 hover:text-copperDeep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
+                                >
+                                    Open manual directions in Google Maps
+                                    <span aria-hidden="true">↗</span>
+                                </a>
+                            </div>
+                        </div>
+                        <p id="directions-status" class="min-h-5 text-sm font-medium text-inkSoft" role="status" aria-live="polite">
+                            @unless ($dormitoryCoordinatesConfigured)
+                                Dormitory coordinates have not been configured yet.
+                            @endunless
+                        </p>
                     </div>
                 </div>
             </div>
@@ -144,4 +202,7 @@
             </div>
         </div>
     </section>
+    @push('scripts')
+        @vite('resources/js/app.js')
+    @endpush
 </x-layout>
