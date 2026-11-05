@@ -24,3 +24,29 @@
     --font-sans: "Inter", sans-serif;
     --font-mono: "IBM Plex Mono", monospace;
 }
+
+.dormitory-marker {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+}
+
+.dormitory-marker__pin {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border: 3px solid #FBF7EC;
+    border-radius: 9999px 9999px 9999px 0;
+    background: #C1712F;
+    box-shadow: 0 2px 8px rgb(22 35 28 / 35%);
+    color: #FBF7EC;
+    font-size: 1.25rem;
+    font-weight: 700;
+    transform: rotate(-45deg);
+}
+
+.dormitory-marker__pin span {
+    transform: rotate(45deg);
+}
