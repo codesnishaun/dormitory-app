@@ -14,7 +14,7 @@
                 <p class="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-success">Application submitted</p>
                 <h1 class="mt-2 font-display text-3xl font-semibold text-ink">Thanks for reaching out.</h1>
                 <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-inkSoft">
-                    The B&amp;A Dormitory team will review your details and contact you using the information you provided.
+                    The {{ config('dormitory.name') }} team will review your details and contact you using the information you provided.
                 </p>
                 <x-button variant="copper" :href="route('home')" class="mt-7">Back to home</x-button>
             </div>
@@ -43,7 +43,7 @@
                             Make room for <em class="text-copper">what’s next.</em>
                         </h1>
                         <p class="mt-5 max-w-lg text-base leading-relaxed text-inkSoft">
-                            Tell us a little about yourself and when you’d like to move in. The B&amp;A Dormitory team will follow up with you about your application.
+                            Tell us a little about yourself and when you’d like to move in. The {{ config('dormitory.name') }} team will follow up with you about your application.
                         </p>
 
                         <div class="mt-8 rounded-2xl border border-paper2 bg-paper3 p-5 sm:p-6">
@@ -74,9 +74,9 @@
                         </div>
 
                         <p class="mt-4 text-xs leading-relaxed text-inkSoft">
-                            <span class="font-semibold text-ink">B&amp;A Dormitory</span>
+                            <span class="font-semibold text-ink">{{ config('dormitory.name') }}</span>
                             <span aria-hidden="true"> · </span>
-                            San Ildefonso, Bulacan
+                            {{ config('dormitory.address') }}
                         </p>
                     </div>
 
