@@ -15,3 +15,13 @@ L.Icon.Default.mergeOptions({
 
 initializeDormitoryMap();
 initializeDirections();
+
+document.querySelectorAll('[data-mobile-navigation] a').forEach((link) => {
+    link.addEventListener('click', () => {
+        const mobileNavigation = link.closest('[data-mobile-navigation]');
+
+        if (mobileNavigation) {
+            mobileNavigation.open = false;
+        }
+    });
+});
