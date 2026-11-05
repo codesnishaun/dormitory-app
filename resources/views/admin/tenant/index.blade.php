@@ -89,6 +89,18 @@
                                 </td>
                                 <td class="px-3 py-3.5">
                                     <div class="flex justify-end gap-2">
+                                        @if ($assignment?->status === 'reserved' && $tenant->tenantAccountInvitations->isNotEmpty())
+                                            <form method="POST" action="{{ route('admin.tenant.move-in', [$tenant, $assignment]) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    onclick="return confirm(this.dataset.confirmation)"
+                                                    data-confirmation="Mark {{ $tenant->name }} in room {{ $assignment->room->room_number }} as occupied?"
+                                                    class="rounded-full border border-success/40 px-3.5 py-1.5 text-xs font-semibold text-success transition hover:bg-success/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success">
+                                                    Mark as Occupied
+                                                </button>
+                                            </form>
+                                        @endif
                                         <button type="button" data-tenant-edit data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}" data-tenant-email="{{ $tenant->email }}"
                                             class="rounded-full border border-paper2 px-3.5 py-1.5 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                             Edit
@@ -138,7 +150,19 @@
                             </div>
                         </dl>
 
-                        <div class="mt-4 flex gap-2 border-t border-paper2/70 pt-3">
+                        <div class="mt-4 flex flex-col gap-2 border-t border-paper2/70 pt-3 sm:flex-row">
+                            @if ($assignment?->status === 'reserved' && $tenant->tenantAccountInvitations->isNotEmpty())
+                                <form method="POST" action="{{ route('admin.tenant.move-in', [$tenant, $assignment]) }}" class="flex-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        onclick="return confirm(this.dataset.confirmation)"
+                                        data-confirmation="Mark {{ $tenant->name }} in room {{ $assignment->room->room_number }} as occupied?"
+                                        class="w-full rounded-full border border-success/40 px-3 py-2 text-xs font-semibold text-success transition hover:bg-success/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success">
+                                        Mark as Occupied
+                                    </button>
+                                </form>
+                            @endif
                             <button type="button" data-tenant-edit data-tenant-id="{{ $tenant->id }}" data-tenant-name="{{ $tenant->name }}" data-tenant-email="{{ $tenant->email }}"
                                 class="flex-1 rounded-full border border-paper2 px-3 py-2 text-xs font-semibold transition hover:bg-paper2/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal">
                                 Edit

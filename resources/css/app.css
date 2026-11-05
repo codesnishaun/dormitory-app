@@ -20,7 +20,52 @@
     --color-success:    #4C7A50;
     --color-danger:     #B33F3F;
 
-    --font-display: "Fraunces", serif;
-    --font-sans: "Inter", sans-serif;
+    --font-display: Georgia, "Times New Roman", serif;
+    --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "IBM Plex Mono", monospace;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.dormitory-marker {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+}
+
+.dormitory-marker__pin {
+    display: grid;
+    width: 2.25rem;
+    height: 2.25rem;
+    place-items: center;
+    border: 3px solid #FBF7EC;
+    border-radius: 9999px 9999px 9999px 0;
+    background: #C1712F;
+    box-shadow: 0 2px 8px rgb(22 35 28 / 35%);
+    color: #FBF7EC;
+    font-size: 1.25rem;
+    font-weight: 700;
+    transform: rotate(-45deg);
+}
+
+.dormitory-marker__pin span {
+    transform: rotate(45deg);
 }

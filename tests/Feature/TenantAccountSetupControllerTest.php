@@ -1,6 +1,8 @@
 <?php
 
 use App\Mail\TenantAccountSetupMail;
+use App\Models\Room;
+use App\Models\RoomAssignment;
 use App\Models\TenantAccountInvitation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -33,6 +35,18 @@ test('tenant account setup page renders a styled password form for a valid invit
 test('tenant can set a password through the account setup form', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $tenant = User::factory()->create(['role' => 'tenant']);
+    $room = Room::query()->create([
+        'room_number' => 'R901',
+        'capacity' => 1,
+        'monthly_rent' => 4200,
+        'status' => 'reserved',
+    ]);
+    $assignment = RoomAssignment::query()->create([
+        'user_id' => $tenant->id,
+        'room_id' => $room->id,
+        'status' => 'reserved',
+        'start_date' => today()->toDateString(),
+    ]);
     $token = 'tenant-password-token';
 
     $invitation = TenantAccountInvitation::query()->create([
@@ -53,6 +67,10 @@ test('tenant can set a password through the account setup form', function () {
         'used_at' => $invitation->fresh()->used_at,
     ]);
     expect(password_verify('a-secure-tenant-password', $tenant->fresh()->password))->toBeTrue();
+    $this->assertDatabaseHas('room_assignments', [
+        'id' => $assignment->id,
+        'status' => 'reserved',
+    ]);
 });
 
 test('tenant setup email includes a branded call to action and expiry details', function () {

@@ -86,6 +86,14 @@ class TenantInvitationService
                     'status' => 'reserved',
                     'start_date' => $application->move_in_date,
                 ]);
+                $room->update([
+                    'status' => RoomAssignment::query()
+                        ->where('room_id', $room->id)
+                        ->where('status', 'occupied')
+                        ->exists()
+                            ? 'occupied'
+                            : 'reserved',
+                ]);
 
                 $application->forceFill(['user_id' => $tenant->id])->save();
             } else {
