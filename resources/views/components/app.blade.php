@@ -8,8 +8,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'DORA' }}</title>
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 </head>
@@ -175,7 +176,11 @@
             </aside>
 
             {{-- Main --}}
-            <main class="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain bg-paper p-4 sm:p-8">
+            <main @class([
+                'min-h-0 min-w-0 flex-1 overscroll-contain bg-paper p-4 sm:p-8',
+                'flex flex-col overflow-hidden' => request()->routeIs('admin.ask-dora', 'tenant.ask-dora'),
+                'overflow-y-auto' => ! request()->routeIs('admin.ask-dora', 'tenant.ask-dora'),
+            ])>
                 {{ $slot }}
             </main>
 
@@ -185,6 +190,10 @@
     @else
         {{ $slot }}
     @endif
+    <x-chat-assistant
+        mode="widget"
+        :audience="auth()->user()?->role ?? 'Guest'"
+    />
     @stack('scripts')
 </body>
 </html>

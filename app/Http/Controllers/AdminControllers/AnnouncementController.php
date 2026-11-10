@@ -4,18 +4,13 @@ namespace App\Http\Controllers\AdminControllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Services\Admin\AnnouncementCreationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
-    public const CATEGORIES = [
-        'General update',
-        'Utilities',
-        'Maintenance',
-        'Community event',
-        'Reminder',
-    ];
+    public const CATEGORIES = Announcement::CATEGORIES;
 
     public function index(Request $request)
     {
@@ -35,25 +30,21 @@ class AnnouncementController extends Controller
         return view('admin.announcement.index', [
             'publishedAnnouncements' => $published->map->toCard()->all(),
             'scheduledAnnouncements' => $scheduled->map->toCard()->all(),
-            'pinnedCount'            => $published->where('is_pinned', true)->count(),
-            'categories'             => self::CATEGORIES,
-            'editing'                => $editing,
+            'pinnedCount' => $published->where('is_pinned', true)->count(),
+            'categories' => self::CATEGORIES,
+            'editing' => $editing,
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, AnnouncementCreationService $announcements)
     {
         $data = $this->validated($request);
+        $data['is_pinned'] = $request->boolean('is_pinned');
 
-        Announcement::create([
-            'title'       => $data['title'],
-            'category'    => $data['category'],
-            'body'        => $data['body'],
-            'author_name' => $request->user()?->name ?? 'Admin',
-            'is_pinned'   => $request->boolean('is_pinned'),
-            'publish_at'  => $this->resolvePublishAt($data),
-            'ends_at'     => $data['ends_at'] ?? null,
-        ]);
+        $announcements->create(
+            $request->user(),
+            $data,
+        );
 
         return redirect()->route('admin.announcement.index')
             ->with('success', 'Announcement posted!');
@@ -64,12 +55,12 @@ class AnnouncementController extends Controller
         $data = $this->validated($request);
 
         $announcement->update([
-            'title'      => $data['title'],
-            'category'   => $data['category'],
-            'body'       => $data['body'],
-            'is_pinned'  => $request->boolean('is_pinned'),
+            'title' => $data['title'],
+            'category' => $data['category'],
+            'body' => $data['body'],
+            'is_pinned' => $request->boolean('is_pinned'),
             'publish_at' => $this->resolvePublishAt($data, $announcement),
-            'ends_at'    => $data['ends_at'] ?? null,
+            'ends_at' => $data['ends_at'] ?? null,
         ]);
 
         return redirect()->route('admin.announcement.index')
@@ -95,12 +86,12 @@ class AnnouncementController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'category'     => ['required', 'in:' . implode(',', self::CATEGORIES)],
-            'body'         => ['required', 'string'],
+            'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'in:'.implode(',', Announcement::CATEGORIES)],
+            'body' => ['required', 'string'],
             'publish_mode' => ['required', 'in:now,schedule'],
-            'publish_at'   => ['required_if:publish_mode,schedule', 'nullable', 'date', 'after:now'],
-            'ends_at'      => ['nullable', 'date', 'after_or_equal:today'],
+            'publish_at' => ['required_if:publish_mode,schedule', 'nullable', 'date', 'after:now'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:today'],
         ]);
     }
 

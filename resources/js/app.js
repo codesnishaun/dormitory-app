@@ -5,6 +5,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { initializeDirections } from './directions.js';
 import { initializeDormitoryMap } from './dormitory-map.js';
+import './chat-assistant.js';
 
 delete L.Icon.Default.prototype._getIconUrl;
 

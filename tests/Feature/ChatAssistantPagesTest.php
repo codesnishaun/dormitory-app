@@ -11,10 +11,15 @@ test('admins can open the admin DORA workspace', function () {
     $response = $this->actingAs($admin)->get(route('admin.ask-dora'));
 
     $response->assertSee('DORA for admins')
-        ->assertSee('Maintenance requests')
+        ->assertSee('Summarize current room occupancy')
+        ->assertSee('Which rooms are currently available?')
+        ->assertSee('Show currently published announcements')
+        ->assertSee('aria-label="DORA conversation history"', false)
+        ->assertSee('data-chat-conversation-list', false)
+        ->assertDontSee('Summarize open maintenance requests')
         ->assertSee('Billing overview')
         ->assertSee(route('admin.ask-dora'))
-        ->assertSee('Preview mode');
+        ->assertSee('AI unavailable');
 });
 
 test('tenants can open the resident DORA workspace', function () {
@@ -24,7 +29,25 @@ test('tenants can open the resident DORA workspace', function () {
 
     $response->assertSee('Ask DORA')
         ->assertSee('Understand your bill and common charges.')
-        ->assertSee('Preview mode');
+        ->assertSee('What is my current room assignment?')
+        ->assertSee('Explain my latest electricity bill')
+        ->assertSee('Check my maintenance or absence request status')
+        ->assertSee('Check or submit an absence request')
+        ->assertSee('aria-label="DORA conversation history"', false)
+        ->assertSee('data-chat-conversation-list', false)
+        ->assertDontSee('Summarize current room occupancy')
+        ->assertSee('AI unavailable');
+});
+
+test('guests can open the floating DORA assistant without access to tenant records', function () {
+    $this->get(route('home'))
+        ->assertOk()
+        ->assertSee('Ask DORA')
+        ->assertSee('AI unavailable');
+
+    $this->getJson(route('chat.conversations.index'))
+        ->assertOk()
+        ->assertJsonPath('data', []);
 });
 
 test('users cannot open the DORA workspace for another role', function (string $role, string $routeName) {
