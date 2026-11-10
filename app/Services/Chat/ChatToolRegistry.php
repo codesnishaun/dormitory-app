@@ -27,7 +27,10 @@ class ChatToolRegistry
         'get_room_availability' => [
             'roles' => ['guest', 'tenant', 'admin'],
             'description' => 'Get room capacities and reserved, occupied, and unassigned spaces.',
-            'parameters' => ['available_only' => ['type' => 'boolean', 'required' => false]],
+            'parameters' => [
+                'available_only' => ['type' => 'boolean', 'required' => false],
+                'limit' => ['type' => 'integer', 'required' => false],
+            ],
         ],
         'get_tenant_room' => [
             'roles' => ['tenant'],
@@ -42,32 +45,32 @@ class ChatToolRegistry
         'get_payment_history' => [
             'roles' => ['tenant'],
             'description' => 'Get the authenticated tenant’s recent payment history.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_electricity_bills' => [
             'roles' => ['tenant'],
             'description' => 'Get finalized electricity allocations for the authenticated tenant.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_maintenance_status' => [
             'roles' => ['tenant'],
             'description' => 'Get maintenance requests belonging to the authenticated tenant.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_absence_status' => [
             'roles' => ['tenant'],
             'description' => 'Get absence requests belonging to the authenticated tenant.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_application_status' => [
             'roles' => ['tenant'],
             'description' => 'Get application records belonging to the authenticated tenant.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_announcements' => [
             'roles' => ['guest', 'tenant', 'admin'],
             'description' => 'Get currently published dormitory announcements.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_room_occupancy_summary' => [
             'roles' => ['admin'],
@@ -82,27 +85,27 @@ class ChatToolRegistry
         'get_admin_tenants' => [
             'roles' => ['admin'],
             'description' => 'Get a bounded list of active tenants with their assigned room and outstanding balance.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_admin_pending_applications' => [
             'roles' => ['admin'],
             'description' => 'Get recent pending applications with applicant name, preferred room, and move-in date.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_admin_pending_absences' => [
             'roles' => ['admin'],
             'description' => 'Get pending absence requests with tenant, room, dates, reason, and reference.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_admin_maintenance_requests' => [
             'roles' => ['admin'],
             'description' => 'Get pending and in-progress maintenance requests with tenant, room, and issue details.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'get_admin_electricity_bills' => [
             'roles' => ['admin'],
             'description' => 'Get recent finalized electricity bills grouped by room and billing period.',
-            'parameters' => [],
+            'parameters' => ['limit' => ['type' => 'integer', 'required' => false]],
         ],
         'prepare_announcement' => [
             'roles' => ['admin'],
@@ -193,19 +196,74 @@ class ChatToolRegistry
                 'assignment' => $this->tenantData->currentRoom($this->tenantActor($actor)),
             ]),
             'get_tenant_balance' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->balance($this->tenantActor($actor))),
-            'get_payment_history' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->paymentHistory($this->tenantActor($actor))),
-            'get_electricity_bills' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->electricityBills($this->tenantActor($actor))),
-            'get_maintenance_status' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->maintenanceStatus($this->tenantActor($actor))),
-            'get_absence_status' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->absenceStatus($this->tenantActor($actor))),
-            'get_application_status' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->applicationStatus($this->tenantActor($actor))),
-            'get_announcements' => $this->withoutArguments($arguments, fn (): array => $this->tenantData->announcements()),
+            'get_payment_history' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->paymentHistory($this->tenantActor($actor), $limit),
+                20,
+                'payments',
+            ),
+            'get_electricity_bills' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->electricityBills($this->tenantActor($actor), $limit),
+                12,
+                'bills',
+            ),
+            'get_maintenance_status' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->maintenanceStatus($this->tenantActor($actor), $limit),
+                20,
+                'requests',
+            ),
+            'get_absence_status' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->absenceStatus($this->tenantActor($actor), $limit),
+                20,
+                'requests',
+            ),
+            'get_application_status' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->applicationStatus($this->tenantActor($actor), $limit),
+                10,
+                'applications',
+            ),
+            'get_announcements' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->announcements($limit),
+                10,
+                'announcements',
+            ),
             'get_room_occupancy_summary' => $this->withoutArguments($arguments, fn (): array => $this->occupancySummary()),
             'get_admin_overview' => $this->adminTool($arguments, fn (): array => $this->tenantData->adminOverview()),
-            'get_admin_tenants' => $this->adminTool($arguments, fn (): array => $this->tenantData->adminTenants()),
-            'get_admin_pending_applications' => $this->adminTool($arguments, fn (): array => $this->tenantData->adminPendingApplications()),
-            'get_admin_pending_absences' => $this->adminTool($arguments, fn (): array => $this->tenantData->adminPendingAbsences()),
-            'get_admin_maintenance_requests' => $this->adminTool($arguments, fn (): array => $this->tenantData->adminMaintenanceRequests()),
-            'get_admin_electricity_bills' => $this->adminTool($arguments, fn (): array => $this->tenantData->adminElectricityBills()),
+            'get_admin_tenants' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->adminTenants($limit),
+                50,
+                'tenants',
+            ),
+            'get_admin_pending_applications' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->adminPendingApplications($limit),
+                20,
+                'applications',
+            ),
+            'get_admin_pending_absences' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->adminPendingAbsences($limit),
+                20,
+                'requests',
+            ),
+            'get_admin_maintenance_requests' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->adminMaintenanceRequests($limit),
+                20,
+                'requests',
+            ),
+            'get_admin_electricity_bills' => $this->listTool(
+                $arguments,
+                fn (int $limit): array => $this->tenantData->adminElectricityBills($limit),
+                12,
+                'bills',
+            ),
             'prepare_announcement' => $this->prepareRequest(
                 'announcement',
                 $arguments,
@@ -274,6 +332,22 @@ class ChatToolRegistry
         return $operation();
     }
 
+    private function listTool(
+        array $arguments,
+        callable $operation,
+        int $defaultLimit,
+        string $resultKey,
+    ): array {
+        $this->assertOnlyKeys($arguments, ['limit']);
+        $validated = Validator::make($arguments, [
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:50'],
+        ])->validate();
+
+        return [
+            $resultKey => $operation((int) ($validated['limit'] ?? $defaultLimit)),
+        ];
+    }
+
     private function assertOnlyKeys(array $arguments, array $allowedKeys): void
     {
         $unexpectedKeys = array_diff(array_keys($arguments), $allowedKeys);
@@ -297,14 +371,18 @@ class ChatToolRegistry
 
     private function roomAvailability(array $arguments): array
     {
-        $this->assertOnlyKeys($arguments, ['available_only']);
+        $this->assertOnlyKeys($arguments, ['available_only', 'limit']);
         $validated = Validator::make($arguments, [
             'available_only' => ['sometimes', 'boolean'],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
         ])->validate();
 
-        return $this->tenantData->roomAvailability(
-            in_array($validated['available_only'] ?? false, [true, 1, '1'], true),
-        );
+        return [
+            'rooms' => $this->tenantData->roomAvailability(
+                in_array($validated['available_only'] ?? false, [true, 1, '1'], true),
+                isset($validated['limit']) ? (int) $validated['limit'] : null,
+            ),
+        ];
     }
 
     private function adminTool(array $arguments, callable $operation): array

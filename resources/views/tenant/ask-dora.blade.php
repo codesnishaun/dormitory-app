@@ -1,19 +1,27 @@
 @php
     $suggestions = [
-        'Explain my current bill',
-        'Help me write a maintenance request',
-        'What are the visitor guidelines?',
-        'How do I report a room issue?',
+        'What is my current room assignment?',
+        'Explain my latest electricity bill',
+        'What is my outstanding balance?',
+        'Check my maintenance or absence request status',
     ];
 
     $helpItems = [
         'Understand your bill and common charges.',
-        'Find the right place to ask for repairs.',
-        'Get help with dormitory guidelines and announcements.',
+        'Check the status of your own maintenance and absence requests.',
+        'Use the tenant forms to submit a new maintenance or absence request.',
+        'Get help with approved dormitory guidance and published announcements.',
+    ];
+
+    $actionLinks = [
+        ['label' => 'View billing and payment history', 'url' => route('tenant.room-bill')],
+        ['label' => 'Check or submit an absence request', 'url' => route('tenant.absence-request')],
+        ['label' => 'Check or submit a maintenance request', 'url' => route('tenant.maintenance')],
+        ['label' => 'Read announcements', 'url' => route('tenant.announcements')],
     ];
 @endphp
 
-<x-tenant-layout body-class="min-h-screen font-sans text-ink">
+<x-tenant-layout body-class="h-dvh overflow-hidden font-sans text-ink">
     <x-slot:title>Ask DORA - DORA</x-slot:title>
 
     <x-header
@@ -23,9 +31,10 @@
 
     <x-chat-assistant
         audience="Resident"
-        welcome-message="Ask about bills, maintenance, announcements, or dormitory guidelines. Choose a prompt to get started."
+        welcome-message="Ask about your room, bills, request statuses, announcements, or dormitory guidance. Choose a prompt to get started."
         help-title="How DORA can help"
         :suggestions="$suggestions"
         :help-items="$helpItems"
+        :action-links="$actionLinks"
     />
 </x-tenant-layout>

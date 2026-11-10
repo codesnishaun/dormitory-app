@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Announcement extends Model
 {
+    public const CATEGORIES = [
+        'General update',
+        'Utilities',
+        'Maintenance',
+        'Community event',
+        'Reminder',
+    ];
+
     protected $fillable = [
         'title',
         'category',
@@ -17,9 +25,9 @@ class Announcement extends Model
     ];
 
     protected $casts = [
-        'is_pinned'  => 'boolean',
+        'is_pinned' => 'boolean',
         'publish_at' => 'datetime',
-        'ends_at'    => 'date',
+        'ends_at' => 'date',
     ];
 
     // Visible na sa residents
@@ -41,19 +49,19 @@ class Announcement extends Model
     public function toCard(): array
     {
         return [
-            'id'       => $this->id,
-            'title'    => $this->title,
+            'id' => $this->id,
+            'title' => $this->title,
             'category' => $this->category,
-            'date'     => $this->publish_at->format('F j, Y'),
-            'time'     => $this->publish_at->format('g:i A'),
-            'author'   => $this->author_name ?? 'Admin',
-            'body'     => $this->body,
-            'pinned'   => $this->is_pinned,
-            'tone'     => match ($this->category) {
-                'Utilities'       => 'copper',
+            'date' => $this->publish_at->format('F j, Y'),
+            'time' => $this->publish_at->format('g:i A'),
+            'author' => $this->author_name ?? 'Admin',
+            'body' => $this->body,
+            'pinned' => $this->is_pinned,
+            'tone' => match ($this->category) {
+                'Utilities' => 'copper',
                 'Community event' => 'teal',
-                'Maintenance'     => 'success',
-                default           => 'ink',
+                'Maintenance' => 'success',
+                default => 'ink',
             },
         ];
     }

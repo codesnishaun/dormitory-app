@@ -1,15 +1,15 @@
 @php
     $suggestions = [
-        'Summarize open maintenance requests',
-        'Draft an announcement for residents',
-        'What should I review in this month’s billing?',
-        'Help me write a resident reminder',
+        'Summarize current room occupancy',
+        'Which rooms are currently available?',
+        'Show currently published announcements',
+        'Find approved guidance about dormitory policies',
     ];
 
     $helpItems = [
-        'Prepare resident-facing announcements and reminders.',
-        'Find relevant admin sections for common tasks.',
-        'Organize operational questions for future assistant workflows.',
+        'Check room occupancy and availability from current dormitory records.',
+        'Review published announcements and approved dormitory guidance.',
+        'Use the admin workspaces for billing, approvals, and any record changes.',
     ];
 
     $actionLinks = [
@@ -29,7 +29,7 @@
 
     <x-chat-assistant
         audience="Admin"
-        welcome-message="Ask about dorm operations or start with a suggested task. Admin workspace links are available alongside the chat."
+        welcome-message="Ask about live room information, published announcements, or approved dormitory guidance. Choose a prompt to get started."
         help-title="Admin assistant"
         :suggestions="$suggestions"
         :help-items="$helpItems"
